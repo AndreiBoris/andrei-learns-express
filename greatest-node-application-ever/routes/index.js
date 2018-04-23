@@ -3,7 +3,10 @@ const storeController = require( '../controllers/storeController' )
 
 const router = express.Router()
 
-router.get( '/', storeController.homePage )
+/**
+ * Example of route specific middleware
+ */
+router.get( '/', storeController.myMiddleware, storeController.homePage )
 
 // Old Example stuff
 // Do work here
