@@ -1,18 +1,24 @@
 // based on https://gist.github.com/paulirish/12fb951a8b893a454b32
 
-const $ = document.querySelector.bind(document);
-const $$ = document.querySelectorAll.bind(document);
+const $ = document.querySelector.bind( document )
+const $$ = document.querySelectorAll.bind( document )
 
-Node.prototype.on = window.on = function (name, fn) {
-  this.addEventListener(name, fn);
-};
+// $('.wrapper').on('click', ()=>{}) // kinda thing
 
-NodeList.prototype.__proto__ = Array.prototype; // eslint-disable-line
+window.on = function nodeOnListener( name, fn ) {
+  this.addEventListener( name, fn )
+}
 
-NodeList.prototype.on = NodeList.prototype.addEventListener = function (name, fn) {
-  this.forEach((elem) => {
-    elem.on(name, fn);
-  });
-};
+Node.prototype.on = window.on
 
-export { $, $$ };
+NodeList.prototype.__proto__ = Array.prototype // eslint-disable-line
+
+NodeList.prototype.addEventListener = function nodeListAddEventListener( name, fn ) {
+  this.forEach( elem => {
+    elem.on( name, fn )
+  } )
+}
+
+NodeList.prototype.on = NodeList.prototype.addEventListener
+
+export { $, $$ }

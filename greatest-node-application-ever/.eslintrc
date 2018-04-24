@@ -1,8 +1,8 @@
 {
   "extends": "airbnb-base",
-  "globals": {
-    "window": true,
-    "document": true
+  "env": {
+    "browser": true,
+    "node": true
   },
   "rules": {
     "semi": [2, "never"],
