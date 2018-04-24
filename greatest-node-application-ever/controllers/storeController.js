@@ -1,6 +1,45 @@
 const mongoose = require( 'mongoose' )
 
 const Store = mongoose.model( 'Store' )
+const multer = require( 'multer' )
+const jimp = require( 'jimp' )
+const uuid = require( 'uuid' )
+
+const multerOptions = {
+  storage: multer.memoryStorage(),
+  fileFilter( req, file, next ) {
+    const isPhoto = file.mimetype.startsWith( 'image/' )
+    if ( isPhoto ) {
+      // first value is error, which is null here, second value means success and gets passed along
+      next( null, true )
+    } else {
+      next( 'That filetype isn\'t allowed', false )
+    }
+  },
+}
+
+// This will just allow us to upload a photo, we will still need to resize and save
+exports.upload = multer( multerOptions ).single( 'photo' )
+
+exports.resize = async ( req, res, next ) => {
+  // Check if there is no new file to resize
+  if ( !req.file ) {
+    next() // Skip to the next middleware
+    return
+  }
+
+  const extension = req.file.mimetype.split( '/' )[1]
+
+  req.body.photo = `${uuid.v4()}.${extension}`
+
+  // now we resize
+  const photo = await jimp.read( req.file.buffer )
+  await photo.resize( 800, jimp.AUTO )
+  await photo.write( `./public/uploads/${req.body.photo}` )
+
+  // once we have written the photo to file system, keep going!
+  next()
+}
 
 exports.myMiddleware = ( req, res, next ) => {
   req.name = 'Andy'
@@ -17,6 +56,10 @@ exports.addStore = ( req, res ) => {
   res.render( 'editStore', { title: 'Add a Store' } )
 }
 
+// Will need to get the form to accept file uploads
+// Will need logic to upload and resize the file using middleware
+// External package multer for file uploading
+// External package jimp for file resizing
 exports.createStore = async ( req, res ) => {
   /**
    * This works because we've already set up a strict schema in models/Store.js
@@ -31,7 +74,7 @@ exports.createStore = async ( req, res ) => {
 exports.getStores = async ( req, res ) => {
   // Query the database for all stores
   const stores = await Store.find()
-  console.log( stores )
+
   res.render( 'stores', { title: 'Stores', stores } )
 }
 

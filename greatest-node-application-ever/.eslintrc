@@ -5,6 +5,7 @@
     "node": true
   },
   "rules": {
+    "no-underscore-dangle": ["error", { "allow": ["_id"] }],
     "semi": [2, "never"],
     "space-in-parens": ["error", "always"],
     "array-bracket-spacing": ["error", "always"],

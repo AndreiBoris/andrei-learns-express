@@ -19,6 +19,7 @@ const storeSchema = new mongoose.Schema( {
     type: Date,
     default: Date.now,
   },
+  photo: String,
   location: {
     type: {
       type: String,
