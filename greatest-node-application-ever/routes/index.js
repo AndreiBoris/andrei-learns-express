@@ -3,10 +3,12 @@ const storeController = require( '../controllers/storeController' )
 
 const router = express.Router()
 
-/**
- * Example of route specific middleware
- */
-router.get( '/', storeController.myMiddleware, storeController.homePage )
+const { catchErrors } = require( '../handlers/errorHandlers' )
+
+router.get( '/', catchErrors( storeController.getStores ) )
+router.get( '/stores', catchErrors( storeController.getStores ) )
+router.get( '/add', storeController.addStore )
+router.post( '/add', catchErrors( storeController.createStore ) )
 
 // Old Example stuff
 // Do work here
