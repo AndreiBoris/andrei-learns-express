@@ -34,3 +34,27 @@ exports.getStores = async ( req, res ) => {
   console.log( stores )
   res.render( 'stores', { title: 'Stores', stores } )
 }
+
+exports.editStore = async ( req, res ) => {
+  // Find the store given the ID
+  const store = await Store.findOne( { _id: req.params.id } )
+  // TODO: Confirm user is the owner of the store
+  // Render out the edit form
+  res.render( 'editStore', { title: `Edit ${store.name}`, store } )
+}
+
+exports.updateStore = async ( req, res ) => {
+  // Find the store given the ID
+  const storeQuery = { _id: req.params.id }
+  const storeUpdatedData = req.body
+
+  const store = await Store.findOneAndUpdate( storeQuery, storeUpdatedData, {
+    new: true, // Return the updated store instead of the old one
+    runValidators: true, // Force model to run validators
+  } ).exec()
+  // TODO: Confirm user is the owner of the store
+
+  // Show the user the updated store and tell them the update worked
+  req.flash( 'success', `Successfully updated <strong>${store.name}</strong>. <a href="/stores/${store.slug}">View store →</a>` )
+  res.redirect( `/stores/${store._id}/edit` )
+}
