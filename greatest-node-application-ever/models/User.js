@@ -25,7 +25,12 @@ const userSchema = new Schema( {
   },
 } )
 
-// Indicates what field on our schema is used as login username
+//
+/**
+ * Indicates what field on our schema is used as login username
+ *
+ * This also assigns some low level methods to our User model, like .register()
+ */
 userSchema.plugin( passportLocalMongoose, {
   usernameField: 'email',
 } )

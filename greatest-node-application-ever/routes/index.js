@@ -1,6 +1,7 @@
 const express = require( 'express' )
 const storeController = require( '../controllers/storeController' )
 const userController = require( '../controllers/userController' )
+const authController = require( '../controllers/authController' )
 
 const router = express.Router()
 
@@ -20,12 +21,11 @@ router.post( '/add', storeController.upload, catchErrors( storeController.resize
 router.post( '/add/:id', storeController.upload, catchErrors( storeController.resize ), catchErrors( storeController.updateStore ) )
 
 router.get( '/login', userController.loginForm )
+router.post( '/login', userController.validateLogin, authController.login )
 router.get( '/register', userController.registerForm )
 
-// validate the registration data
-// register the user
-// log them in
-router.post( '/register', catchErrors( userController.validateRegister ) )
+router.post( '/register', userController.validateRegister, userController.register, authController.login )
+router.get( '/logout', authController.logout )
 
 // Old Example stuff
 // Do work here
