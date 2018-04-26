@@ -45,7 +45,7 @@ storeSchema.pre( 'save', async function storeSchemaPreSave( next ) {
   }
 
   this.slug = slug( this.name )
-  // find ohter stores that have this same slug or variations like slug-1, slug-2, etc.
+  // find other stores that have this same slug or variations like slug-1, slug-2, etc.
   const slugRegEx = new RegExp( `^(${this.slug})((-[0-9]*$)?)$`, 'i' )
 
   const storesWithSlug = await this.constructor.find( { slug: slugRegEx } )

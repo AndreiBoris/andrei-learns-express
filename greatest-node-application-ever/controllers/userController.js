@@ -83,3 +83,29 @@ exports.register = async ( req, res, next ) => {
 
   next() // pass to authController.login
 }
+
+exports.account = ( req, res ) => {
+  res.render( 'account', { title: 'Edit Your Account' } )
+}
+
+exports.updateAccount = async ( req, res ) => {
+  const currentUserQuery = {
+    _id: req.user._id,
+  }
+  const updates = {
+    $set: {
+      name: req.body.name,
+      email: req.body.email,
+    },
+  }
+
+  const user = await User.findOneAndUpdate( currentUserQuery, updates, {
+    new: true, // Return the updated store instead of the old one
+    runValidators: true, // Force model to run validators
+    context: 'query',
+  } )
+
+  req.flash( 'success', 'Updated your account information 😮' )
+
+  res.redirect( 'back' )
+}
