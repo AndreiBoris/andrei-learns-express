@@ -25,6 +25,12 @@ const userSchema = new Schema( {
   },
 } )
 
+userSchema.virtual( 'gravatar' ).get( function userGravatar() {
+  // Use a hash to avoid showing the user's email address when creating the gravatar field
+  const hash = md5( this.email )
+  return `https://gravatar.com/avatar/${hash}?s=200`
+} )
+
 //
 /**
  * Indicates what field on our schema is used as login username
