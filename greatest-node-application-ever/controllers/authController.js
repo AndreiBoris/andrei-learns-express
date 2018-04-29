@@ -4,6 +4,7 @@ const crypto = require( 'crypto' )
 const promisify = require( 'es6-promisify' )
 
 const User = mongoose.model( 'User' )
+const { send: sendMail } = require( '../handlers/mail' )
 
 const appValidation = require( '../validation' )
 
@@ -54,9 +55,16 @@ exports.forgot = async ( req, res ) => {
   user.save()
   // Send them an email with the token
   // TODO: do this properly, for now send token directly
-  const resetUrl = `http://${req.headers.host}/account/reset/${user.resetPasswordToken}`
+  const resetURL = `http://${req.headers.host}/account/reset/${user.resetPasswordToken}`
 
-  req.flash( 'success', `You have been emailed a password reset link! ${resetUrl}` )
+  await sendMail( {
+    user,
+    subject: 'Password Reset',
+    resetURL,
+    filename: 'password-reset',
+  } )
+
+  req.flash( 'success', 'You have been emailed a password reset link!' )
 
   // Redirect to login page
   res.redirect( '/login' )
