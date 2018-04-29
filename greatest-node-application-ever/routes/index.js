@@ -30,6 +30,11 @@ router.get( '/logout', authController.logout )
 router.get( '/account', authController.isLoggedIn, userController.account )
 router.post( '/account', authController.isLoggedIn, catchErrors( userController.updateAccount ) )
 
+// Password reset
+router.post( '/account/forgot', catchErrors( authController.forgot ) )
+router.get( '/account/reset/:token', catchErrors( authController.reset ) )
+router.post( '/account/reset', catchErrors( authController.changePassword ) )
+
 // Old Example stuff
 // Do work here
 // router.get( '/', ( req, res ) => {

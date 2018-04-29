@@ -1,6 +1,6 @@
 const mongoose = require( 'mongoose' )
 
-const Schema = mongoose.Schema
+const { Schema } = mongoose
 
 mongoose.Promise = global.Promise
 
@@ -23,6 +23,8 @@ const userSchema = new Schema( {
     required: 'Please supply a name',
     trim: true,
   },
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
 } )
 
 userSchema.virtual( 'gravatar' ).get( function userGravatar() {

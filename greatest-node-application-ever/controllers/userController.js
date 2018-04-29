@@ -1,8 +1,10 @@
 const mongoose = require( 'mongoose' )
 const objValues = require( 'lodash/values' )
+const objDeepMerge = require( 'lodash/merge' )
 
 const User = mongoose.model( 'User' )
 const promisify = require( 'es6-promisify' )
+const appValidation = require( '../validation' )
 
 exports.loginForm = ( req, res ) => {
   res.render( 'login', { title: 'Login' } )
@@ -12,45 +14,17 @@ exports.registerForm = ( req, res ) => {
   res.render( 'register', { title: 'Register' } )
 }
 
-function validateName( req ) {
-  req.sanitizeBody( 'name' )
-  req
-    .checkBody( 'name', 'You must supply a name that is at least 3 characters long!' )
-    .notEmpty()
-    .isLength( { min: 3 } )
-}
-
-function validateEmail( req ) {
-  req.checkBody( 'email', 'That email is not valid' ).isEmail()
-  req.sanitizeBody( 'email' ).normalizeEmail( {
-    gmail_remove_dots: true,
-    gmail_remove_subaddress: false,
-  } )
-}
-
 exports.validateRegister = ( req, res, next ) => {
   // name
-  validateName( req )
+  appValidation.validateName( req )
 
   // email
-  validateEmail( req )
+  appValidation.validateEmail( req )
 
   // password
-  req
-    .checkBody( 'password', 'Password must be at least 5 characters long and contain a number' )
-    .notEmpty()
-    .isLength( { min: 5 } )
-    .matches( /\d/ )
-  req
-    .checkBody( 'password-confirm', 'Password confirmation field must have the same value as the password field' )
-    .notEmpty()
-    .equals( req.body.password )
+  appValidation.validatePassword( req )
 
-  const errors = req.validationErrors( true )
-
-  if ( errors ) {
-    req.flash( 'error', objValues( errors ).map( err => err.msg ) )
-    res.render( 'register', { title: 'Register', body: req.body, flashes: req.flash() } )
+  if ( appValidation.displayErrors( req, res, 'register', { title: 'Register' } ) ) {
     return
   }
 
@@ -59,13 +33,9 @@ exports.validateRegister = ( req, res, next ) => {
 
 exports.validateLogin = ( req, res, next ) => {
   // email
-  validateEmail( req )
+  appValidation.validateEmail( req )
 
-  const errors = req.validationErrors( true )
-
-  if ( errors ) {
-    req.flash( 'error', objValues( errors ).map( err => err.msg ) )
-    res.render( 'login', { title: 'Login', body: req.body, flashes: req.flash() } )
+  if ( appValidation.displayErrors( req, res, 'login', { title: 'Login' } ) ) {
     return
   }
 
