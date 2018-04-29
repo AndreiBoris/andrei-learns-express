@@ -32,8 +32,13 @@ router.post( '/account', authController.isLoggedIn, catchErrors( userController.
 
 // Password reset
 router.post( '/account/forgot', catchErrors( authController.forgot ) )
-router.get( '/account/reset/:token', catchErrors( authController.reset ) )
-router.post( '/account/reset', catchErrors( authController.changePassword ) )
+router.get( '/account/reset/:token', catchErrors( authController.resetPasswordUser ), catchErrors( authController.reset ) )
+router.post(
+  '/account/reset/:token',
+  authController.confirmedPasswords,
+  catchErrors( authController.resetPasswordUser ),
+  catchErrors( authController.changePassword ),
+)
 
 // Old Example stuff
 // Do work here

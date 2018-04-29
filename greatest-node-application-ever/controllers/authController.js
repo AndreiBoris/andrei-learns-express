@@ -61,54 +61,41 @@ exports.forgot = async ( req, res ) => {
   res.redirect( '/login' )
 }
 
-function passwordResetTokenHasExpired( user ) {
-  return !user || !user.resetPasswordExpires || appValidation.passwordResetTokenExpired( user.resetPasswordExpires )
-}
-
-function passwordResetTokenRejected( req, res ) {
-  req.flash( 'error', 'Sorry, this password reset token token has expired. Please get another one.' )
-  res.redirect( '/login' )
-}
-
-exports.reset = async ( req, res ) => {
+exports.resetPasswordUser = async ( req, res, next ) => {
   // Find a user
   const user = await User.findOne( {
     resetPasswordToken: req.params.token,
+    resetPasswordExpires: { $gt: Date.now() },
   } )
 
   // Check that the token is not expired
-  if ( passwordResetTokenHasExpired( user ) ) {
-    passwordResetTokenRejected( req, res )
+  if ( !user ) {
+    req.flash( 'error', 'Sorry, this password reset token token has expired. Please get another one.' )
+    res.redirect( '/login' )
     return
   }
 
+  req.body.user = user
+  next()
+}
+
+exports.reset = async ( req, res ) => {
   // Show password reset form
-  res.render( 'reset', { title: 'Password Reset', token: req.params.token } )
+  res.render( 'reset', { title: 'Reset your Password' } )
+}
+
+exports.confirmedPasswords = ( req, res, next ) => {
+  // password
+  appValidation.validatePassword( req )
+
+  const REDIRECT = true
+  if ( appValidation.displayErrors( req, res, `/account/reset/${req.params.token}`, null, REDIRECT ) ) {
+    return
+  }
+
+  next()
 }
 
 exports.changePassword = async ( req, res ) => {
-  // passwor
-  appValidation.validatePassword( req )
-
-  // token
-  appValidation.validatePasswordResetToken( req )
-
-  const REDIRECT = true
-  if ( appValidation.displayErrors( req, res, `/account/reset/${req.body.token}`, null, REDIRECT ) ) {
-    return
-  }
-
-  // Find a user
-  const user = await User.findOne( {
-    resetPasswordToken: req.body.token,
-  } )
-
-  // Check that the token corresponds to an existing user AND
-  // Check that the token has not expired
-  if ( passwordResetTokenHasExpired( user ) ) {
-    passwordResetTokenRejected( req, res )
-    return
-  }
-
   res.render( 'login', { title: 'SUCCESS' } )
 }

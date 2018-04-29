@@ -1,9 +1,8 @@
 mixin resetForm()
-  form.form(action="/account/reset" method="POST")
+  form.form(method="POST")
     label(for="password") New Password
     input(type="password" name="password")
     label(for="password-confirm") Confirm New Password
     input(type="password" name="password-confirm")
-    input(type="hidden" name="token" value=token)
     input.button(type="submit" value="Reset Password →")
   

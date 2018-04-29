@@ -1,6 +1,4 @@
 const mongoose = require( 'mongoose' )
-const objValues = require( 'lodash/values' )
-const objDeepMerge = require( 'lodash/merge' )
 
 const User = mongoose.model( 'User' )
 const promisify = require( 'es6-promisify' )
@@ -69,7 +67,7 @@ exports.updateAccount = async ( req, res ) => {
     },
   }
 
-  const user = await User.findOneAndUpdate( currentUserQuery, updates, {
+  await User.findOneAndUpdate( currentUserQuery, updates, {
     new: true, // Return the updated store instead of the old one
     runValidators: true, // Force model to run validators
     context: 'query',

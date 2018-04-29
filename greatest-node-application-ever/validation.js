@@ -17,15 +17,6 @@ exports.validateEmail = req => {
   } )
 }
 
-exports.validatePasswordResetToken = req => {
-  req
-    .checkBody( 'token', 'The password reset token provided is invalid.' )
-    .isHexadecimal()
-    .isLength( { min: 40, max: 40 } )
-}
-
-exports.passwordResetTokenExpired = expiryDate => expiryDate.getTime() <= new Date().getTime()
-
 exports.validatePassword = req => {
   req
     .checkBody( 'password', 'Password must be at least 5 characters long and contain a number' )
