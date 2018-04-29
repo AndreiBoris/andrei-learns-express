@@ -1,6 +1,7 @@
 const mongoose = require( 'mongoose' )
 const passport = require( 'passport' )
 const crypto = require( 'crypto' )
+const promisify = require( 'es6-promisify' )
 
 const User = mongoose.model( 'User' )
 
@@ -97,5 +98,16 @@ exports.confirmedPasswords = ( req, res, next ) => {
 }
 
 exports.changePassword = async ( req, res ) => {
-  res.render( 'login', { title: 'SUCCESS' } )
+  const {
+    body: { user },
+  } = req
+  const setPassword = promisify( user.setPassword, user )
+  await setPassword( req.body.password )
+  user.resetPasswordToken = undefined
+  user.resetPasswordExpires = undefined
+  const updatedUser = await user.save()
+  await req.login( updatedUser )
+
+  req.flash( 'success', '💃 Nicely done! Your password has been changed. You are now logged in!' )
+  res.redirect( '/' )
 }
