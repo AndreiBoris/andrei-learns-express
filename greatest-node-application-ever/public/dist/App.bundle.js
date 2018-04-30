@@ -1043,14 +1043,14 @@ function searchErrorHTML() {
 
 function nextItemToHighlightIndex(items, currentIndex) {
   if (currentIndex >= items.length - 1) {
-    return items.length - 1;
+    return 0;
   }
   return currentIndex + 1;
 }
 
 function previousItemToHighlightIndex(items, currentIndex) {
   if (currentIndex <= 0) {
-    return 0;
+    return items.length - 1;
   }
   return currentIndex - 1;
 }
@@ -1100,14 +1100,14 @@ function typeAhead(search) {
   });
 
   // handle keyboard inputs
-  searchInput.on('keyup', function (e) {
+  searchInput.on('keydown', function (e) {
     // 40 is down
     // 38 is up
     // 13 is enter
     var keyCode = e.keyCode;
     // Only respond to keys that are moving the search selection
 
-    if (keyCode !== 13 && keyCode !== 38 && keyCode !== 40) {
+    if (![38, 40, 13].includes(keyCode)) {
       return;
     }
     // Only respond when there are search results to look at
