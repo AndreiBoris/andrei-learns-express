@@ -7,6 +7,10 @@ function autocomplete( input, latInput, lngInput ) {
   /* eslint-disable no-param-reassign */
   dropdown.addListener( 'place_changed', () => {
     const place = dropdown.getPlace()
+    if ( !place.geometry ) {
+      return // Place does not correspond to a known location
+    }
+
     latInput.value = place.geometry.location.lat()
     lngInput.value = place.geometry.location.lng()
   } )

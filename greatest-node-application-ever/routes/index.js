@@ -11,6 +11,8 @@ router.get( '/', catchErrors( storeController.getStores ) )
 router.get( '/stores', catchErrors( storeController.getStores ) )
 router.get( '/stores/:slug', catchErrors( storeController.getStoreBySlug ) )
 
+router.get( '/map', storeController.map )
+
 router.get( '/add', authController.isLoggedIn, storeController.addStore )
 router.get( '/stores/:id/edit', catchErrors( storeController.editStore ) )
 
@@ -45,5 +47,6 @@ router.post(
  */
 
 router.get( '/api/search', catchErrors( storeController.searchStores ) )
+router.get( '/api/stores/near', catchErrors( storeController.mapStores ) )
 
 module.exports = router

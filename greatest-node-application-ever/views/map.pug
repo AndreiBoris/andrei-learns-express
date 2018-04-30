@@ -1,0 +1,12 @@
+extends layout
+
+block content
+  .inner
+    h2 Find Stores
+    label(for="address") Address
+    input(type="text" id="address" name="location[address]")
+    label(for="lng") Longitude 
+    input(type="text" id="lng", name="location[coordinates][0]")
+    label(for="lat") Latitude 
+    input(type="text" id="lat", name="location[coordinates][1]")
+    #map.map

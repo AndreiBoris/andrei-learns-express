@@ -932,6 +932,10 @@ function autocomplete(input, latInput, lngInput) {
   /* eslint-disable no-param-reassign */
   dropdown.addListener('place_changed', function () {
     var place = dropdown.getPlace();
+    if (!place.geometry) {
+      return; // Place does not correspond to a known location
+    }
+
     latInput.value = place.geometry.location.lat();
     lngInput.value = place.geometry.location.lng();
   });
@@ -2747,10 +2751,132 @@ var _typeAhead = __webpack_require__(10);
 
 var _typeAhead2 = _interopRequireDefault(_typeAhead);
 
+var _mapStores = __webpack_require__(38);
+
+var _mapStores2 = _interopRequireDefault(_mapStores);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 (0, _autocomplete2.default)((0, _bling.$)('#address'), (0, _bling.$)('#lat'), (0, _bling.$)('#lng'));
 (0, _typeAhead2.default)((0, _bling.$)('.search'));
+(0, _mapStores2.default)((0, _bling.$)('#map'), (0, _bling.$)('#lat'), (0, _bling.$)('#lng'));
+
+/***/ }),
+/* 32 */,
+/* 33 */,
+/* 34 */,
+/* 35 */,
+/* 36 */,
+/* 37 */,
+/* 38 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _axios = __webpack_require__(12);
+
+var _axios2 = _interopRequireDefault(_axios);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// Adds a marker to the map and push to the array.
+function addMarker(markers, location, map, title) {
+  var marker = new google.maps.Marker({
+    position: location,
+    map: map,
+    title: title
+  });
+  markers.push(marker);
+}
+
+// Removes the markers from the map, but keeps them in the array.
+function clearMarkers(markers) {
+  markers.forEach(function (marker) {
+    return marker.setMap(null);
+  });
+  markers = [];
+}
+
+var mapStores = function mapStores(map, latInput, lngInput) {
+  if (!map) {
+    return; // if there is no map don't do anything
+  }
+
+  var markers = [];
+
+  var googleMap = new google.maps.Map(map, {
+    center: { lat: 0, lng: 0 },
+    zoom: 15
+  });
+  window.mapper = googleMap;
+
+  var lastLat = 0;
+  var lastLng = 0;
+
+  setInterval(function () {
+    var mapNeedsUpdate = false;
+
+    var latInputValue = parseFloat(latInput.value);
+    var lngInputValue = parseFloat(lngInput.value);
+
+    if (Number.isNaN(latInputValue) || Number.isNaN(lngInputValue)) {
+      return; // wait for proper input
+    }
+
+    if (latInputValue !== lastLat) {
+      lastLat = latInputValue;
+      mapNeedsUpdate = true;
+    }
+
+    if (lngInputValue !== lastLng) {
+      lastLng = lngInputValue;
+      mapNeedsUpdate = true;
+    }
+
+    if (mapNeedsUpdate) {
+      // Delete old markers
+      clearMarkers(markers);
+
+      // Populate new map markers
+      _axios2.default.get('/api/stores/near?lat=' + latInputValue + '&lng=' + lngInputValue).then(function (res) {
+        // Show requested area
+        googleMap.setCenter({
+          lat: lastLat,
+          lng: lastLng
+        });
+        if (res.data.length) {
+          res.data.forEach(function (store) {
+            var storeName = store.name;
+            var coordinates = store.location.coordinates;
+
+            var _coordinates = _slicedToArray(coordinates, 2),
+                storeLng = _coordinates[0],
+                storeLat = _coordinates[1];
+
+            var markerCoordinates = {
+              lat: storeLat,
+              lng: storeLng
+            };
+            addMarker(markers, markerCoordinates, googleMap, storeName);
+          });
+        }
+        // TODO: tell them nothing came back
+      }).catch(function () {
+        // TODO: Report err to tracking service
+        // TODO: Tell user there was an error
+      });
+    }
+  }, 100);
+};
+
+exports.default = mapStores;
 
 /***/ })
 /******/ ]);
