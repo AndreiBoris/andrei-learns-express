@@ -1043,7 +1043,7 @@ function searchResultsHTML(stores) {
 }
 
 function searchErrorHTML() {
-  return '\n  <p>Unfortunately something went wrong during search. If this persists, please contact us so that we can fix the issue for you!</p>\n  ';
+  return '\n  <div class="search__result">\n  Unfortunately something went wrong during search. If this persists, please contact us so that we can fix the issue for you!\n  </div>\n  ';
 }
 
 function nextItemToHighlightIndex(items, currentIndex) {
@@ -1080,6 +1080,8 @@ function typeAhead(search) {
   var currentSelectedSearchIndex = 0;
 
   searchInput.on('input', function handleSearchInput() {
+    var _this = this;
+
     // if there is no value, quit it!
     if (!this.value) {
       searchResults.style.display = 'none';
@@ -1097,7 +1099,10 @@ function typeAhead(search) {
         searchResults.innerHTML = searchResultsHTML(res.data);
         searchResultItems = Array.from(searchResults.querySelectorAll('.search__result'));
         highlightItem(searchResultItems, currentSelectedSearchIndex);
+        return;
       }
+      // tell them nothing came back
+      searchResults.innerHTML = '<div class="search__result">No results for ' + _this.value + ' found!</div>';
     }).catch(function () {
       // TODO: Report err to tracking service
       searchResults.innerHTML = searchErrorHTML();

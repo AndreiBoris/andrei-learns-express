@@ -10,7 +10,9 @@ function searchResultsHTML( stores ) {
 
 function searchErrorHTML() {
   return `
-  <p>Unfortunately something went wrong during search. If this persists, please contact us so that we can fix the issue for you!</p>
+  <div class="search__result">
+  Unfortunately something went wrong during search. If this persists, please contact us so that we can fix the issue for you!
+  </div>
   `
 }
 
@@ -67,7 +69,10 @@ function typeAhead( search ) {
           searchResults.innerHTML = searchResultsHTML( res.data )
           searchResultItems = Array.from( searchResults.querySelectorAll( '.search__result' ) )
           highlightItem( searchResultItems, currentSelectedSearchIndex )
+          return
         }
+        // tell them nothing came back
+        searchResults.innerHTML = `<div class="search__result">No results for ${this.value} found!</div>`
       } )
       .catch( () => {
         // TODO: Report err to tracking service
