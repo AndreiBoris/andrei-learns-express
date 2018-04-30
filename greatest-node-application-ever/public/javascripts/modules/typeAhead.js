@@ -1,19 +1,24 @@
 import axios from 'axios'
+import dompurify from 'dompurify'
 
 function searchResultsHTML( stores ) {
-  return stores
+  return dompurify.sanitize( stores
     .map( store => `<a class="search__result" href="/stores/${store.slug}">
       <strong>${store.name}</strong>
     </a>` )
-    .join( '' )
+    .join( '' ) )
+}
+
+function noResultsHtml( searchTerm ) {
+  return dompurify.sanitize( `<div class="search__result">No results for ${searchTerm} found!</div>` )
 }
 
 function searchErrorHTML() {
-  return `
+  return dompurify.sanitize( `
   <div class="search__result">
   Unfortunately something went wrong during search. If this persists, please contact us so that we can fix the issue for you!
   </div>
-  `
+  ` )
 }
 
 function nextItemToHighlightIndex( items, currentIndex ) {
@@ -72,7 +77,7 @@ function typeAhead( search ) {
           return
         }
         // tell them nothing came back
-        searchResults.innerHTML = `<div class="search__result">No results for ${this.value} found!</div>`
+        searchResults.innerHTML = noResultsHtml( this.value )
       } )
       .catch( () => {
         // TODO: Report err to tracking service

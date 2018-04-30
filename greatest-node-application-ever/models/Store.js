@@ -1,5 +1,6 @@
 const mongoose = require( 'mongoose' )
 const slug = require( 'slugs' )
+const sanitizeHtml = require( 'sanitize-html' )
 
 mongoose.Promise = global.Promise
 
@@ -50,25 +51,33 @@ storeSchema.index( {
 } )
 
 storeSchema.pre( 'save', async function storeSchemaPreSave( next ) {
+  this.name = sanitizeHtml( this.name )
+  this.description = sanitizeHtml( this.description )
+  this.location.address = sanitizeHtml( this.location.address )
+
   if ( !this.isModified( 'name' ) ) {
     next()
     return
   }
 
-  this.slug = slug( this.name )
+  const baseSlug = slug( this.name )
   // find other stores that have this same slug or variations like slug-1, slug-2, etc.
-  const slugRegEx = new RegExp( `^(${this.slug})((-[0-9]*$)?)$`, 'i' )
+  const slugRegEx = new RegExp( `^(${baseSlug})((-[0-9]*$)?)$`, 'i' )
 
   const storesWithSlug = await this.constructor.find( { slug: slugRegEx } )
+  const storeSlugs = storesWithSlug.map( store => store.slug )
 
-  if ( storesWithSlug.length ) {
-    this.slug = `${this.slug}-${storesWithSlug.length + 1}`
+  this.slug = baseSlug
+
+  // Handle duplicate slugs
+  let numberSuffix = storeSlugs.length + 1
+  while ( storeSlugs.includes( this.slug ) ) {
+    this.slug = `${baseSlug}-${numberSuffix}`
+    // Keep attaching new suffixes until we have one that is not already in the database
+    numberSuffix += 1
   }
 
-  // TODO: Requires a check that the new slug created isn't actually inside storesWithSlug and to keep changing until this is not the case
-
   next()
-  // TODO: Make more resilient so slugs are unique
 } )
 
 storeSchema.statics.getTagsList = async function storeSchemaGetTagsList() {
