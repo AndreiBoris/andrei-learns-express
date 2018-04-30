@@ -172,16 +172,18 @@ exports.mapStores = async ( req, res ) => {
           type: 'Point',
           coordinates,
         },
-        $maxDistance: 1000,
+        $maxDistance: 10000, // 10 km
       },
     },
   }
 
   const stores = await Store.find( query )
+    .select( 'slug name description location photo' )
+    .limit( 10 )
 
   res.json( stores )
 }
 
-exports.map = ( req, res ) => {
+exports.mapPage = ( req, res ) => {
   res.render( 'map', { title: 'Find Stores' } )
 }

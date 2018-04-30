@@ -2759,7 +2759,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (0, _autocomplete2.default)((0, _bling.$)('#address'), (0, _bling.$)('#lat'), (0, _bling.$)('#lng'));
 (0, _typeAhead2.default)((0, _bling.$)('.search'));
-(0, _mapStores2.default)((0, _bling.$)('#map'), (0, _bling.$)('#lat'), (0, _bling.$)('#lng'));
+(0, _mapStores2.default)((0, _bling.$)('#map'));
 
 /***/ }),
 /* 32 */,
@@ -2784,99 +2784,176 @@ var _axios = __webpack_require__(12);
 
 var _axios2 = _interopRequireDefault(_axios);
 
+var _bling = __webpack_require__(9);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// Adds a marker to the map and push to the array.
-function addMarker(markers, location, map, title) {
-  var marker = new google.maps.Marker({
-    position: location,
-    map: map,
-    title: title
-  });
-  markers.push(marker);
-}
-
-// Removes the markers from the map, but keeps them in the array.
-function clearMarkers(markers) {
-  markers.forEach(function (marker) {
-    return marker.setMap(null);
-  });
-  markers = [];
-}
-
-var mapStores = function mapStores(map, latInput, lngInput) {
-  if (!map) {
-    return; // if there is no map don't do anything
-  }
-
-  var markers = [];
-
-  var googleMap = new google.maps.Map(map, {
-    center: { lat: 0, lng: 0 },
-    zoom: 15
-  });
-  window.mapper = googleMap;
-
-  var lastLat = 0;
-  var lastLng = 0;
-
-  setInterval(function () {
-    var mapNeedsUpdate = false;
-
-    var latInputValue = parseFloat(latInput.value);
-    var lngInputValue = parseFloat(lngInput.value);
-
-    if (Number.isNaN(latInputValue) || Number.isNaN(lngInputValue)) {
-      return; // wait for proper input
-    }
-
-    if (latInputValue !== lastLat) {
-      lastLat = latInputValue;
-      mapNeedsUpdate = true;
-    }
-
-    if (lngInputValue !== lastLng) {
-      lastLng = lngInputValue;
-      mapNeedsUpdate = true;
-    }
-
-    if (mapNeedsUpdate) {
-      // Delete old markers
-      clearMarkers(markers);
-
-      // Populate new map markers
-      _axios2.default.get('/api/stores/near?lat=' + latInputValue + '&lng=' + lngInputValue).then(function (res) {
-        // Show requested area
-        googleMap.setCenter({
-          lat: lastLat,
-          lng: lastLng
-        });
-        if (res.data.length) {
-          res.data.forEach(function (store) {
-            var storeName = store.name;
-            var coordinates = store.location.coordinates;
-
-            var _coordinates = _slicedToArray(coordinates, 2),
-                storeLng = _coordinates[0],
-                storeLat = _coordinates[1];
-
-            var markerCoordinates = {
-              lat: storeLat,
-              lng: storeLng
-            };
-            addMarker(markers, markerCoordinates, googleMap, storeName);
-          });
-        }
-        // TODO: tell them nothing came back
-      }).catch(function () {
-        // TODO: Report err to tracking service
-        // TODO: Tell user there was an error
-      });
-    }
-  }, 100);
+var mapOptions = {
+  center: { lat: 43.2, lng: -79.8 },
+  zoom: 8
 };
 
-exports.default = mapStores;
+var googleAPI = window.google;
+
+function loadPlaces(map) {
+  var lat = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 43.2;
+  var lng = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : -79.8;
+
+  _axios2.default.get('/api/stores/near?lat=' + lat + '&lng=' + lng).then(function (res) {
+    var places = res.data;
+    if (!places.length) {
+      alert('No places found!');
+      return;
+    }
+    // create a bounds
+    var bounds = new googleAPI.maps.LatLngBounds();
+    // create an info window
+    var infoWindow = new googleAPI.maps.InfoWindow();
+
+    var markers = places.map(function (place) {
+      var _place$location$coord = _slicedToArray(place.location.coordinates, 2),
+          placeLng = _place$location$coord[0],
+          placeLat = _place$location$coord[1];
+
+      var position = {
+        lat: placeLat,
+        lng: placeLng
+      };
+
+      bounds.extend(position);
+
+      var marker = new googleAPI.maps.Marker({ map: map, position: position });
+      marker.place = place;
+      return marker;
+    });
+
+    // When someone clicks on a marker, show the details of that place
+    markers.forEach(function (marker) {
+      marker.addListener('click', function openInfoWindow() {
+        var html = '\n          <div class="popup">\n            <a href="/stores/' + this.place.slug + '">\n              <img src="/uploads/' + (this.place.photo || 'store.png') + '" alt="' + this.place.name + '">\n              <p>\n                ' + this.place.description + ' - ' + this.place.location.address + '\n              </p>\n            </a>\n          </div>\n        ';
+
+        infoWindow.setContent(html);
+        infoWindow.open(map, this);
+      });
+    });
+
+    // zoom the map to fit all markers perfeltly
+    map.setCenter(bounds.getCenter());
+    map.fitBounds(bounds);
+  });
+}
+
+function makeMap(mapDiv) {
+  if (!mapDiv) {
+    return;
+  }
+  if (!googleAPI) {
+    return;
+  }
+
+  var map = new googleAPI.maps.Map(mapDiv, mapOptions);
+  loadPlaces(map);
+
+  var input = (0, _bling.$)('[name="geolocate"]');
+  var autocomplete = new googleAPI.maps.places.Autocomplete(input);
+  autocomplete.addListener('place_changed', function () {
+    var place = autocomplete.getPlace();
+    loadPlaces(map, place.geometry.location.lat(), place.geometry.location.lng());
+  });
+}
+
+exports.default = makeMap;
+
+// // Adds a marker to the map and push to the array.
+// function addMarker( markers, location, map, title ) {
+//   const marker = new google.maps.Marker( {
+//     position: location,
+//     map,
+//     title,
+//   } )
+//   markers.push( marker )
+// }
+
+// // Removes the markers from the map, but keeps them in the array.
+// function clearMarkers( markers ) {
+//   markers.forEach( marker => marker.setMap( null ) )
+//   markers = []
+// }
+
+// const mapStores = ( map, latInput, lngInput ) => {
+//   if ( !map ) {
+//     return // if there is no map don't do anything
+//   }
+
+//   const markers = []
+
+//   const googleMap = new google.maps.Map( map, {
+//     center: { lat: 0, lng: 0 },
+//     zoom: 15,
+//   } )
+//   window.mapper = googleMap
+
+//   let lastLat = 0
+//   let lastLng = 0
+
+//   setInterval( () => {
+//     let mapNeedsUpdate = false
+
+//     const latInputValue = parseFloat( latInput.value )
+//     const lngInputValue = parseFloat( lngInput.value )
+
+//     if ( Number.isNaN( latInputValue ) || Number.isNaN( lngInputValue ) ) {
+//       return // wait for proper input
+//     }
+
+//     if ( latInputValue !== lastLat ) {
+//       lastLat = latInputValue
+//       mapNeedsUpdate = true
+//     }
+
+//     if ( lngInputValue !== lastLng ) {
+//       lastLng = lngInputValue
+//       mapNeedsUpdate = true
+//     }
+
+//     if ( mapNeedsUpdate ) {
+//       // Delete old markers
+//       clearMarkers( markers )
+
+//       // Populate new map markers
+//       axios
+//         .get( `/api/stores/near?lat=${latInputValue}&lng=${lngInputValue}` )
+//         .then( res => {
+//           // Show requested area
+//           googleMap.setCenter( {
+//             lat: lastLat,
+//             lng: lastLng,
+//           } )
+//           if ( res.data.length ) {
+//             res.data.forEach( store => {
+//               const { name: storeName } = store
+//               const {
+//                 location: { coordinates },
+//               } = store
+//               const [ storeLng, storeLat ] = coordinates
+//               const markerCoordinates = {
+//                 lat: storeLat,
+//                 lng: storeLng,
+//               }
+//               addMarker( markers, markerCoordinates, googleMap, storeName )
+//             } )
+//           }
+//           // TODO: tell them nothing came back
+//         } )
+//         .catch( () => {
+//           // TODO: Report err to tracking service
+//           // TODO: Tell user there was an error
+//         } )
+//     }
+//   }, 100 )
+// }
+
+// export default mapStores
 
 /***/ })
 /******/ ]);
