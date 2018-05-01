@@ -2996,17 +2996,31 @@ function updateHeartButton(button, pressed) {
 }
 
 function handleHeartFormSubmit(ev) {
+  var _this = this;
+
   ev.preventDefault();
 
   var postUrl = this.action;
-  var button = this.querySelector('.heart__button');
 
   _axios2.default.post(postUrl).then(function (_ref) {
     var data = _ref.data;
 
     updateHeartCounter(counterDiv, data.user.hearts.length);
-    updateHeartButton(button, data.user.hearts.includes(data.storeId));
-  });
+    var isHearted = data.user.hearts.includes(data.storeId);
+    updateHeartButton(_this.heart, isHearted);
+    if (isHearted) {
+      _this.heart.classList.add('heart__button--float');
+      // Once the animation ends, remove the float class
+      _this.heart.addEventListener('animationend', function (event) {
+        console.log('HEART HAS FLOWN');
+        if (event.animationName === 'fly') {
+          _this.heart.classList.remove('heart__button--float');
+        }
+      }, {
+        once: true
+      });
+    }
+  }).catch(console.error);
 }
 
 var toggleHeart = function toggleHeart(counterDivSelected, heartForms) {
