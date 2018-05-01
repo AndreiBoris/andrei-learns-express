@@ -220,5 +220,9 @@ exports.getHeartedStores = async ( req, res ) => {
     },
   } )
 
+  // Alternate way of doing this:
+  // const user = await User.findOne( { _id: req.user._id } ).populate( 'hearts' )
+  // const { hearts: stores } = user
+
   res.render( 'stores', { title: 'Hearts', stores } )
 }
