@@ -212,3 +212,13 @@ exports.heartStore = async ( req, res ) => {
 
   res.json( response )
 }
+
+exports.getHeartedStores = async ( req, res ) => {
+  const stores = await Store.find( {
+    _id: {
+      $in: req.user.hearts,
+    },
+  } )
+
+  res.render( 'stores', { title: 'Hearts', stores } )
+}

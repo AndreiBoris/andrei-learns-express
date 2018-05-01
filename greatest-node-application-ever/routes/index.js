@@ -10,6 +10,7 @@ const { catchErrors } = require( '../handlers/errorHandlers' )
 router.get( '/', catchErrors( storeController.getStores ) )
 router.get( '/stores', catchErrors( storeController.getStores ) )
 router.get( '/stores/:slug', catchErrors( storeController.getStoreBySlug ) )
+router.get( '/hearts', authController.isLoggedIn, catchErrors( storeController.getHeartedStores ) )
 
 router.get( '/map', storeController.mapPage )
 
