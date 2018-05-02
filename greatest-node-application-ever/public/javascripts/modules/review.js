@@ -2,25 +2,15 @@ import axios from 'axios'
 import md5 from 'md5'
 import moment from 'moment'
 
-function getStarRating( stars ) {
-  const starRange = [ 5, 4, 3, 2, 1 ] // [ 5, 4, ..., 1]
-  // return the highest star rating passed
-  for ( let i = 0; i < stars.length; i += 1 ) {
-    const star = stars[i]
-    if ( star.name === `star${starRange[i]}` && star.checked ) {
-      return starRange[i]
-    }
-  }
-  return null
-}
-
 const loadReviews = ( reviewList, storeId ) => {
   axios
     .get( `/api/reviews/${storeId}` )
     .then( ( { data } ) => {
       /* eslint-disable no-param-reassign */
       reviewList.innerHTML = data
-        .map( review => `
+        .map( review => {
+          const starRatingHTML = [ 1, 2, 3, 4, 5 ].map( number => `${number <= review.rating ? '★' : '☆'}` ).join( '' )
+          return `
         <div class="review">
 
           <div class="review__header">
@@ -29,7 +19,7 @@ const loadReviews = ( reviewList, storeId ) => {
               <span>${review.author.name}</span>
             </div>
             <div class="review__stars">
-              ${review.rating}
+              ${starRatingHTML}
             </div>
             <div class="review__time">
               ${moment( review.created ).fromNow()}
@@ -44,7 +34,8 @@ const loadReviews = ( reviewList, storeId ) => {
             Last updated ${moment( review.updated ).fromNow()}
           </div>
         </div>
-        ` )
+        `
+        } )
         .join( '' )
       /* eslint-enable */
     } )

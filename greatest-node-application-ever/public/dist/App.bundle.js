@@ -16226,25 +16226,16 @@ var _moment2 = _interopRequireDefault(_moment);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function getStarRating(stars) {
-  var starRange = [5, 4, 3, 2, 1]; // [ 5, 4, ..., 1]
-  // return the highest star rating passed
-  for (var i = 0; i < stars.length; i += 1) {
-    var star = stars[i];
-    if (star.name === 'star' + starRange[i] && star.checked) {
-      return starRange[i];
-    }
-  }
-  return null;
-}
-
 var loadReviews = function loadReviews(reviewList, storeId) {
   _axios2.default.get('/api/reviews/' + storeId).then(function (_ref) {
     var data = _ref.data;
 
     /* eslint-disable no-param-reassign */
     reviewList.innerHTML = data.map(function (review) {
-      return '\n        <div class="review">\n\n          <div class="review__header">\n            <div class="review__author">\n              <img class="avatar" src="https://gravatar.com/avatar/' + (0, _md2.default)(review.author.email) + '?s=200&d=retro">\n              <span>' + review.author.name + '</span>\n            </div>\n            <div class="review__stars">\n              ' + review.rating + '\n            </div>\n            <div class="review__time">\n              ' + (0, _moment2.default)(review.created).fromNow() + '\n            </div>\n          </div>\n\n          <div class="review__body">\n            <p>' + review.text + '</p>\n          </div>\n\n          <div class="review__meta ' + (review.updated === review.created ? 'hide' : '') + '">\n            Last updated ' + (0, _moment2.default)(review.updated).fromNow() + '\n          </div>\n        </div>\n        ';
+      var starRatingHTML = [1, 2, 3, 4, 5].map(function (number) {
+        return '' + (number <= review.rating ? '★' : '☆');
+      }).join('');
+      return '\n        <div class="review">\n\n          <div class="review__header">\n            <div class="review__author">\n              <img class="avatar" src="https://gravatar.com/avatar/' + (0, _md2.default)(review.author.email) + '?s=200&d=retro">\n              <span>' + review.author.name + '</span>\n            </div>\n            <div class="review__stars">\n              ' + starRatingHTML + '\n            </div>\n            <div class="review__time">\n              ' + (0, _moment2.default)(review.created).fromNow() + '\n            </div>\n          </div>\n\n          <div class="review__body">\n            <p>' + review.text + '</p>\n          </div>\n\n          <div class="review__meta ' + (review.updated === review.created ? 'hide' : '') + '">\n            Last updated ' + (0, _moment2.default)(review.updated).fromNow() + '\n          </div>\n        </div>\n        ';
     }).join('');
     /* eslint-enable */
   }).catch(console.error);
