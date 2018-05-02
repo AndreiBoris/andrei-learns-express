@@ -51,62 +51,63 @@ const loadReviews = ( reviewList, storeId ) => {
     .catch( console.error )
 }
 
-const enableReview = ( reviewForm, reviewList, reviewErrors ) => {
-  if ( !reviewForm ) return
+const enableReview = ( reviewForm, reviewList ) => {
   if ( !reviewList ) return
 
   loadReviews( reviewList, reviewList.dataset.storeId )
 
-  const stars = Array.from( reviewForm.querySelectorAll( '.reviewer__stars [type="checkbox"]' ) )
-  const starLabels = Array.from( reviewForm.querySelectorAll( '.reviewer__stars label' ) )
-  const errorDiv = reviewForm.querySelector( '.reviewer__errors' )
+  // Can only add listener if the reviewForm is on the page, indicating a logged-in user
+  if ( reviewForm ) {
+    const stars = Array.from( reviewForm.querySelectorAll( '.reviewer__stars [type="checkbox"]' ) )
+    const starLabels = Array.from( reviewForm.querySelectorAll( '.reviewer__stars label' ) )
+    const errorDiv = reviewForm.querySelector( '.reviewer__errors' )
 
-  starLabels.forEach( label => {
-    label.on( 'click', function selectStar() {
-      const associatedStar = stars.find( star => star.name === this.getAttribute( 'for' ) )
-      stars.forEach( star => {
-        /* eslint-disable no-param-reassign */
-        star.checked = false
-        /* eslint-enable */
+    starLabels.forEach( label => {
+      label.on( 'click', function selectStar() {
+        const associatedStar = stars.find( star => star.name === this.getAttribute( 'for' ) )
+        stars.forEach( star => {
+          /* eslint-disable no-param-reassign */
+          star.checked = false
+          /* eslint-enable */
+        } )
+        associatedStar.checked = true
       } )
-      associatedStar.checked = true
     } )
-  } )
 
-  // TODO: Need to get back validation errors and display them for the user
-  reviewForm.on( 'submit', function submitReviewForm( ev ) {
-    ev.preventDefault()
-    const rating = getStarRating( stars )
-    const text = this.text.value
+    reviewForm.on( 'submit', function submitReviewForm( ev ) {
+      ev.preventDefault()
+      const rating = getStarRating( stars )
+      const text = this.text.value
 
-    axios
-      .post( this.action, {
-        rating,
-        text,
-      } )
-      .then( ( { data } ) => {
-        errorDiv.innerHTML = ''
-        errorDiv.classList.add( 'hide' )
-        loadReviews( reviewList, data.store )
-      } )
-      .catch( ( { response } ) => {
-        const { status, data } = response
-        if ( status === 422 ) {
-          if ( Array.isArray( data ) ) {
-            errorDiv.innerHTML = data
-              .map( validationError => `
+      axios
+        .post( this.action, {
+          rating,
+          text,
+        } )
+        .then( ( { data } ) => {
+          errorDiv.innerHTML = ''
+          errorDiv.classList.add( 'hide' )
+          loadReviews( reviewList, data.store )
+        } )
+        .catch( ( { response } ) => {
+          const { status, data } = response
+          if ( status === 422 ) {
+            if ( Array.isArray( data ) ) {
+              errorDiv.innerHTML = data
+                .map( validationError => `
               <p>
                 ${validationError}
               </p>
               ` )
-              .join( '' )
-            errorDiv.classList.remove( 'hide' )
+                .join( '' )
+              errorDiv.classList.remove( 'hide' )
+            }
+            return
           }
-          return
-        }
-        console.error( response )
-      } )
-  } )
+          console.error( response )
+        } )
+    } )
+  }
 }
 
 export default enableReview

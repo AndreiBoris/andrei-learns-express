@@ -16250,64 +16250,65 @@ var loadReviews = function loadReviews(reviewList, storeId) {
   }).catch(console.error);
 };
 
-var enableReview = function enableReview(reviewForm, reviewList, reviewErrors) {
-  if (!reviewForm) return;
+var enableReview = function enableReview(reviewForm, reviewList) {
   if (!reviewList) return;
 
   loadReviews(reviewList, reviewList.dataset.storeId);
 
-  var stars = Array.from(reviewForm.querySelectorAll('.reviewer__stars [type="checkbox"]'));
-  var starLabels = Array.from(reviewForm.querySelectorAll('.reviewer__stars label'));
-  var errorDiv = reviewForm.querySelector('.reviewer__errors');
+  // Can only add listener if the reviewForm is on the page, indicating a logged-in user
+  if (reviewForm) {
+    var stars = Array.from(reviewForm.querySelectorAll('.reviewer__stars [type="checkbox"]'));
+    var starLabels = Array.from(reviewForm.querySelectorAll('.reviewer__stars label'));
+    var errorDiv = reviewForm.querySelector('.reviewer__errors');
 
-  starLabels.forEach(function (label) {
-    label.on('click', function selectStar() {
-      var _this = this;
+    starLabels.forEach(function (label) {
+      label.on('click', function selectStar() {
+        var _this = this;
 
-      var associatedStar = stars.find(function (star) {
-        return star.name === _this.getAttribute('for');
+        var associatedStar = stars.find(function (star) {
+          return star.name === _this.getAttribute('for');
+        });
+        stars.forEach(function (star) {
+          /* eslint-disable no-param-reassign */
+          star.checked = false;
+          /* eslint-enable */
+        });
+        associatedStar.checked = true;
       });
-      stars.forEach(function (star) {
-        /* eslint-disable no-param-reassign */
-        star.checked = false;
-        /* eslint-enable */
-      });
-      associatedStar.checked = true;
     });
-  });
 
-  // TODO: Need to get back validation errors and display them for the user
-  reviewForm.on('submit', function submitReviewForm(ev) {
-    ev.preventDefault();
-    var rating = getStarRating(stars);
-    var text = this.text.value;
+    reviewForm.on('submit', function submitReviewForm(ev) {
+      ev.preventDefault();
+      var rating = getStarRating(stars);
+      var text = this.text.value;
 
-    _axios2.default.post(this.action, {
-      rating: rating,
-      text: text
-    }).then(function (_ref2) {
-      var data = _ref2.data;
+      _axios2.default.post(this.action, {
+        rating: rating,
+        text: text
+      }).then(function (_ref2) {
+        var data = _ref2.data;
 
-      errorDiv.innerHTML = '';
-      errorDiv.classList.add('hide');
-      loadReviews(reviewList, data.store);
-    }).catch(function (_ref3) {
-      var response = _ref3.response;
-      var status = response.status,
-          data = response.data;
+        errorDiv.innerHTML = '';
+        errorDiv.classList.add('hide');
+        loadReviews(reviewList, data.store);
+      }).catch(function (_ref3) {
+        var response = _ref3.response;
+        var status = response.status,
+            data = response.data;
 
-      if (status === 422) {
-        if (Array.isArray(data)) {
-          errorDiv.innerHTML = data.map(function (validationError) {
-            return '\n              <p>\n                ' + validationError + '\n              </p>\n              ';
-          }).join('');
-          errorDiv.classList.remove('hide');
+        if (status === 422) {
+          if (Array.isArray(data)) {
+            errorDiv.innerHTML = data.map(function (validationError) {
+              return '\n              <p>\n                ' + validationError + '\n              </p>\n              ';
+            }).join('');
+            errorDiv.classList.remove('hide');
+          }
+          return;
         }
-        return;
-      }
-      console.error(response);
+        console.error(response);
+      });
     });
-  });
+  }
 };
 
 exports.default = enableReview;
