@@ -1,0 +1,10 @@
+mixin reviewForm( storeId )
+  form.reviewer(action=`/api/reviews/${storeId}` method="POST")
+    //- TODO: Should have label here
+    textarea(name="text" placeholder="Did you try this place? Have something to say? Leave a Review...")
+    .reviewer__meta
+      .reviewer__stars
+        each _, i in Array(5)
+          input(type="checkbox" name=`star${5 - i}`)
+          label(for=`star${5 - i}`)
+      input.button(type="submit" value="Submit Review →")

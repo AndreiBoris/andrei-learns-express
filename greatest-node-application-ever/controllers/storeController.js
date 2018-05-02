@@ -111,6 +111,14 @@ exports.updateStore = async ( req, res ) => {
   res.redirect( `/stores/${store._id}/edit` )
 }
 
+exports.getStoreIdBySlug = async ( req, res, next ) => {
+  const store = await Store.findOne( { slug: req.params.slug } ).select( '_id' )
+
+  req.params.id = store._id
+
+  next()
+}
+
 exports.getStoreBySlug = async ( req, res, next ) => {
   // Get the store
   const store = await Store.findOne( { slug: req.params.slug } ).populate( 'author' )
@@ -120,8 +128,10 @@ exports.getStoreBySlug = async ( req, res, next ) => {
     return
   }
 
+  const reviews = req.body.reviews || []
+
   // Render the template
-  res.render( 'store', { title: store.name, store } )
+  res.render( 'store', { title: store.name, store, reviews } )
 }
 
 exports.getStoresByTag = async ( req, res ) => {
