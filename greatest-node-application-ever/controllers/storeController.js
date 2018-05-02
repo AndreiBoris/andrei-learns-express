@@ -2,10 +2,13 @@ const mongoose = require( 'mongoose' )
 
 const Store = mongoose.model( 'Store' )
 const User = mongoose.model( 'User' )
+const Review = mongoose.model( 'Review' )
 
 const multer = require( 'multer' )
 const jimp = require( 'jimp' )
 const uuid = require( 'uuid' )
+
+const merge = require( 'lodash/merge' )
 
 const multerOptions = {
   storage: multer.memoryStorage(),
@@ -138,7 +141,10 @@ exports.getStoreBySlug = async ( req, res, next ) => {
 
   // Render the template
   res.render( 'store', {
-    title: store.name, store, reviews, existingReview,
+    title: store.name,
+    store,
+    reviews,
+    existingReview,
   } )
 }
 
@@ -243,4 +249,50 @@ exports.getHeartedStores = async ( req, res ) => {
   // const { hearts: stores } = user
 
   res.render( 'stores', { title: 'Hearts', stores } )
+}
+
+exports.topStores = async ( req, res ) => {
+  const reviews = await Review
+    // Group reviews by the stores that they belong to, counting the number of reviews and the average rating for each store
+    .aggregate( [
+      {
+        $group: {
+          _id: '$store',
+          count: { $sum: 1 },
+          average: { $avg: '$rating' },
+        },
+      },
+    ] )
+    // Sort the reviews with the highest ratings being at the top regaredless of number of reviews
+    .sort( {
+      average: 'desc',
+    } )
+    // This is a top 10 list
+    .limit( 10 )
+
+  const storeIds = reviews.map( aggregate => aggregate._id )
+
+  const stores = await Store.find( {
+    _id: {
+      $in: storeIds,
+    },
+  } )
+    .lean()
+    .select( 'name slug photo' )
+
+  // Not super efficient but OK when dealing with just a top 10
+  const top10 = reviews.map( review => {
+    const correspondingStore = stores.find( store => review._id.toString() === store._id.toString() )
+
+    if ( !correspondingStore ) {
+      return review
+    }
+
+    correspondingStore.count = review.count
+    correspondingStore.average = review.average
+
+    return correspondingStore
+  } )
+
+  res.render( 'top', { title: 'Top Stores', top10 } )
 }

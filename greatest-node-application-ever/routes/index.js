@@ -17,6 +17,7 @@ router.get(
   catchErrors( storeController.getStoreBySlug ),
 )
 router.get( '/hearts', authController.isLoggedIn, catchErrors( storeController.getHeartedStores ) )
+router.get( '/top', catchErrors( storeController.topStores ) )
 
 router.get( '/map', storeController.mapPage )
 
