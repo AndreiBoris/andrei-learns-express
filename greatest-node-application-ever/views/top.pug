@@ -3,4 +3,21 @@ extends layout
 block content
   .inner
     h2 Top 10 Stores
-    pre= h.dump( top10 )
+    table.table
+      thead
+        tr
+          td Store
+          td Ranking
+          td Name
+          td Reviews
+          td Average Rating
+      tbody
+        each store, i in top10
+          tr
+            td 
+              a(href=`/stores/${store.slug}`)
+                img(src=`/uploads/${store.photo}` alt=store.name width=200)
+            td= i + 1
+            td= store.name
+            td= store.count
+            td= store.average
