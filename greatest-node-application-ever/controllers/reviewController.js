@@ -6,7 +6,7 @@ const User = mongoose.model( 'User' )
 
 const appValidation = require( '../validation' )
 
-exports.reviewStore = async ( req, res ) => {
+exports.addReview = async ( req, res ) => {
   appValidation.validateReview( req )
 
   if ( appValidation.displayErrorsAjax( req, res ) ) {
@@ -19,8 +19,8 @@ exports.reviewStore = async ( req, res ) => {
   }
 
   const reviewPromise = Review.findOne( reviewQuery ).select( '_id' )
-  const storePromise = Store.findById( req.params.id ).select( '_id' )
-  const userPromise = User.findById( req.user._id ).select( '_id' )
+  const storePromise = Store.findById( reviewQuery.store ).select( '_id' )
+  const userPromise = User.findById( reviewQuery.author ).select( '_id' )
   const [ store, user, existingReview ] = await Promise.all( [ storePromise, userPromise, reviewPromise ] )
 
   // TODO: Test what happens when bad store or user is provided
