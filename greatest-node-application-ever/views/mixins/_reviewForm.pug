@@ -13,10 +13,9 @@ mixin reviewForm( storeId, existingReview = {} )
           = existingReview.text
         .reviewer__meta
           .reviewer__stars
-            each _, i in Array(5)
-              - const starValue = 5 - i
-              input(type="checkbox" name=`star${starValue}` checked=( existingReview.rating === starValue ) )
-              label(for=`star${starValue}`)
+            each starValue in [5,4,3,2,1]
+              input(type="radio" name='rating' id=`star${starValue}` value=starValue required )
+              label(for=`star${starValue}`) #{starValue} Stars
           input.button(type="submit" value="Submit Review →")
         .reviewer__errors.hide
       

@@ -58,8 +58,8 @@ const enableReview = ( reviewForm, reviewList ) => {
 
   // Can only add listener if the reviewForm is on the page, indicating a logged-in user
   if ( reviewForm ) {
-    const stars = Array.from( reviewForm.querySelectorAll( '.reviewer__stars [type="checkbox"]' ) )
-    const starLabels = Array.from( reviewForm.querySelectorAll( '.reviewer__stars label' ) )
+    // const stars = Array.from( reviewForm.querySelectorAll( '.reviewer__stars [type="checkbox"]' ) )
+    // const starLabels = Array.from( reviewForm.querySelectorAll( '.reviewer__stars label' ) )
     const errorDiv = reviewForm.querySelector( '.reviewer__errors' )
     // button that users who have previous left a review can use to edit their previous review
     const editReviewButton = reviewForm.querySelector( '.reviewer__edit__button' )
@@ -75,21 +75,21 @@ const enableReview = ( reviewForm, reviewList ) => {
       reviewEditForm.classList.remove( 'hidden' )
     } )
 
-    starLabels.forEach( label => {
-      label.on( 'click', function selectStar() {
-        const associatedStar = stars.find( star => star.name === this.getAttribute( 'for' ) )
-        stars.forEach( star => {
-          /* eslint-disable no-param-reassign */
-          star.checked = false
-          /* eslint-enable */
-        } )
-        associatedStar.checked = true
-      } )
-    } )
+    // starLabels.forEach( label => {
+    //   label.on( 'click', function selectStar() {
+    //     const associatedStar = stars.find( star => star.name === this.getAttribute( 'for' ) )
+    //     stars.forEach( star => {
+    //       /* eslint-disable no-param-reassign */
+    //       star.checked = false
+    //       /* eslint-enable */
+    //     } )
+    //     associatedStar.checked = true
+    //   } )
+    // } )
 
     reviewForm.on( 'submit', function submitReviewForm( ev ) {
       ev.preventDefault()
-      const rating = getStarRating( stars )
+      const rating = this.rating.value // getStarRating( stars )
       const text = this.text.value
 
       axios

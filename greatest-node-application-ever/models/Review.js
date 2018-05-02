@@ -13,7 +13,7 @@ const reviewSchema = new mongoose.Schema( {
   text: {
     type: String,
     trim: true,
-    required: false,
+    required: 'Your review must have text!',
   },
   created: {
     type: Date,

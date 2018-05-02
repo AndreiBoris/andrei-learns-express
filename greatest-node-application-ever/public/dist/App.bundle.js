@@ -16257,8 +16257,8 @@ var enableReview = function enableReview(reviewForm, reviewList) {
 
   // Can only add listener if the reviewForm is on the page, indicating a logged-in user
   if (reviewForm) {
-    var stars = Array.from(reviewForm.querySelectorAll('.reviewer__stars [type="checkbox"]'));
-    var starLabels = Array.from(reviewForm.querySelectorAll('.reviewer__stars label'));
+    // const stars = Array.from( reviewForm.querySelectorAll( '.reviewer__stars [type="checkbox"]' ) )
+    // const starLabels = Array.from( reviewForm.querySelectorAll( '.reviewer__stars label' ) )
     var errorDiv = reviewForm.querySelector('.reviewer__errors');
     // button that users who have previous left a review can use to edit their previous review
     var editReviewButton = reviewForm.querySelector('.reviewer__edit__button');
@@ -16274,25 +16274,21 @@ var enableReview = function enableReview(reviewForm, reviewList) {
       reviewEditForm.classList.remove('hidden');
     });
 
-    starLabels.forEach(function (label) {
-      label.on('click', function selectStar() {
-        var _this = this;
-
-        var associatedStar = stars.find(function (star) {
-          return star.name === _this.getAttribute('for');
-        });
-        stars.forEach(function (star) {
-          /* eslint-disable no-param-reassign */
-          star.checked = false;
-          /* eslint-enable */
-        });
-        associatedStar.checked = true;
-      });
-    });
+    // starLabels.forEach( label => {
+    //   label.on( 'click', function selectStar() {
+    //     const associatedStar = stars.find( star => star.name === this.getAttribute( 'for' ) )
+    //     stars.forEach( star => {
+    //       /* eslint-disable no-param-reassign */
+    //       star.checked = false
+    //       /* eslint-enable */
+    //     } )
+    //     associatedStar.checked = true
+    //   } )
+    // } )
 
     reviewForm.on('submit', function submitReviewForm(ev) {
       ev.preventDefault();
-      var rating = getStarRating(stars);
+      var rating = this.rating.value; // getStarRating( stars )
       var text = this.text.value;
 
       _axios2.default.post(this.action, {

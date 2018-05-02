@@ -16,7 +16,7 @@ block content
           tr
             td 
               a(href=`/stores/${store.slug}`)
-                img(src=`/uploads/${store.photo}` alt=store.name width=200)
+                img(src=`/uploads/${store.photo || 'store.png'}` alt=store.name width=200)
             td= i + 1
             td= store.name
             td= store.count
