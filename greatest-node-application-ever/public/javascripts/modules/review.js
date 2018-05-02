@@ -51,7 +51,7 @@ const loadReviews = ( reviewList, storeId ) => {
     .catch( console.error )
 }
 
-const enableReview = ( reviewForm, reviewList ) => {
+const enableReview = ( reviewForm, reviewList, reviewErrors ) => {
   if ( !reviewForm ) return
   if ( !reviewList ) return
 
@@ -59,6 +59,7 @@ const enableReview = ( reviewForm, reviewList ) => {
 
   const stars = Array.from( reviewForm.querySelectorAll( '.reviewer__stars [type="checkbox"]' ) )
   const starLabels = Array.from( reviewForm.querySelectorAll( '.reviewer__stars label' ) )
+  const errorDiv = reviewForm.querySelector( '.reviewer__errors' )
 
   starLabels.forEach( label => {
     label.on( 'click', function selectStar() {
@@ -84,9 +85,27 @@ const enableReview = ( reviewForm, reviewList ) => {
         text,
       } )
       .then( ( { data } ) => {
+        errorDiv.innerHTML = ''
+        errorDiv.classList.add( 'hide' )
         loadReviews( reviewList, data.store )
       } )
-      .catch( console.error )
+      .catch( ( { response } ) => {
+        const { status, data } = response
+        if ( status === 422 ) {
+          if ( Array.isArray( data ) ) {
+            errorDiv.innerHTML = data
+              .map( validationError => `
+              <p>
+                ${validationError}
+              </p>
+              ` )
+              .join( '' )
+            errorDiv.classList.remove( 'hide' )
+          }
+          return
+        }
+        console.error( response )
+      } )
   } )
 }
 

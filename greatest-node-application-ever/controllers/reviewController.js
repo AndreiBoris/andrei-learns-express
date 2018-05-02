@@ -1,11 +1,18 @@
 const mongoose = require( 'mongoose' )
-const range = require( 'lodash/range' )
 
 const Store = mongoose.model( 'Store' )
 const Review = mongoose.model( 'Review' )
 const User = mongoose.model( 'User' )
 
+const appValidation = require( '../validation' )
+
 exports.reviewStore = async ( req, res ) => {
+  appValidation.validateReview( req )
+
+  if ( appValidation.displayErrorsAjax( req, res ) ) {
+    return
+  }
+
   const reviewQuery = {
     author: req.user._id,
     store: req.params.id,

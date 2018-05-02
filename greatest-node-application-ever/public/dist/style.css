@@ -999,7 +999,7 @@ label {
  */
 .reviewer {
   position: relative;
-  box-shadow: 0 0px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   margin-bottom: 2rem; }
   .reviewer__stars {
     display: -ms-flexbox;
@@ -1017,7 +1017,7 @@ label {
            This is fine for accessibility because our labels have for()
          */ }
         .reviewer__stars input + label:before {
-          content: '\2605';
+          content: "\2605";
           font-size: 2rem; }
         .reviewer__stars input + label[for="star5"] {
           -ms-flex-order: 5;
@@ -1034,7 +1034,8 @@ label {
         .reviewer__stars input + label[for="star1"] {
           -ms-flex-order: 1;
               order: 1; }
-        .reviewer__stars input + label:hover, .reviewer__stars input + label:hover ~ label {
+        .reviewer__stars input + label:hover,
+        .reviewer__stars input + label:hover ~ label {
           color: #ffdd74; }
   .reviewer textarea {
     border: 0;
@@ -1053,6 +1054,13 @@ label {
     .reviewer__meta > * {
       -ms-flex: 1;
           flex: 1; }
+  .reviewer__errors {
+    border-top: 1px solid #e6e6e6;
+    color: #E50714;
+    padding: 0 2rem;
+    margin: 0; }
+    .reviewer__errors p {
+      margin: 0; }
 
 .pagination {
   display: -ms-flexbox;
