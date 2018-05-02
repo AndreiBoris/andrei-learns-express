@@ -1,4 +1,6 @@
 import axios from 'axios'
+import md5 from 'md5'
+import moment from 'moment'
 
 function getStarRating( stars ) {
   const starRange = [ 5, 4, 3, 2, 1 ] // [ 5, 4, ..., 1]
@@ -12,12 +14,48 @@ function getStarRating( stars ) {
   return null
 }
 
-const loadReviews = () => {
-  // axios.get( '/api/reviews/:id' )
+const loadReviews = ( reviewList, storeId ) => {
+  axios
+    .get( `/api/reviews/${storeId}` )
+    .then( ( { data } ) => {
+      /* eslint-disable no-param-reassign */
+      reviewList.innerHTML = data
+        .map( review => `
+        <div class="review">
+
+          <div class="review__header">
+            <div class="review__author">
+              <img class="avatar" src="https://gravatar.com/avatar/${md5( review.author.email )}?s=200&d=retro">
+              <span>${review.author.name}</span>
+            </div>
+            <div class="review__stars">
+              ${review.rating}
+            </div>
+            <div class="review__time">
+              ${moment( review.created ).fromNow()}
+            </div>
+          </div>
+
+          <div class="review__body">
+            <p>${review.text}</p>
+          </div>
+
+          <div class="review__meta ${review.updated === review.created ? 'hide' : ''}">
+            Last updated ${moment( review.updated ).fromNow()}
+          </div>
+        </div>
+        ` )
+        .join( '' )
+      /* eslint-enable */
+    } )
+    .catch( console.error )
 }
 
-const enableReview = reviewForm => {
+const enableReview = ( reviewForm, reviewList ) => {
   if ( !reviewForm ) return
+  if ( !reviewList ) return
+
+  loadReviews( reviewList, reviewList.dataset.storeId )
 
   const stars = Array.from( reviewForm.querySelectorAll( '.reviewer__stars [type="checkbox"]' ) )
   const starLabels = Array.from( reviewForm.querySelectorAll( '.reviewer__stars label' ) )
@@ -34,6 +72,7 @@ const enableReview = reviewForm => {
     } )
   } )
 
+  // TODO: Need to get back validation errors and display them for the user
   reviewForm.on( 'submit', function submitReviewForm( ev ) {
     ev.preventDefault()
     const rating = getStarRating( stars )
@@ -45,7 +84,7 @@ const enableReview = reviewForm => {
         text,
       } )
       .then( ( { data } ) => {
-        console.log( data )
+        loadReviews( reviewList, data.store )
       } )
       .catch( console.error )
   } )

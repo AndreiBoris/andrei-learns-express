@@ -21,18 +21,7 @@ block content
               a.tag__link(href=`/tags/${tag}`)
                 span.tag__text ##{tag}
       +reviewForm( store._id )
-      each review in reviews
-        .review
-          .review__header
-            .review__author 
-              img.avatar(src=`${review.author.gravatar}`)
-              span= review.author.name
-            .review__stars
-              = review.rating
-            .review__time
-              = h.moment(review.created).fromNow()
-          .review__body
-            p= review.text
+      .reviews(data-store-id=store._id)
 
         
 

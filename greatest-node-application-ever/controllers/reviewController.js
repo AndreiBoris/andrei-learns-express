@@ -43,7 +43,7 @@ exports.grabStoreReviews = async ( req, res, next ) => {
   } )
     .select( 'rating author text created updated' )
     .populate( 'author', 'name email' )
-    .sort( { updated: 'descending' } )
+    .sort( { created: 'descending' } )
 
   req.body.reviews = reviews
   next()

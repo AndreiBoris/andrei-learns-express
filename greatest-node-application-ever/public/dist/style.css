@@ -953,7 +953,7 @@ label {
   .review:before {
     width: 5px;
     left: 0;
-    content: '';
+    content: "";
     display: block;
     background: linear-gradient(0, #48ded4 0%, #a026bf 20%, #e82c75 60%, #FFC40E 85%, #48ded4 95%);
     position: absolute;
@@ -984,12 +984,12 @@ label {
     display: flex; }
     .review__author .avatar {
       margin-right: 2rem; }
-  .review__time {
+  .review__time, .review__meta {
     font-size: 1.2rem;
     color: #999999; }
   .review__stars {
     color: #FFC40E; }
-  .review__body {
+  .review__body, .review__meta {
     padding: 2rem; }
   .review p {
     white-space: pre-wrap; }
