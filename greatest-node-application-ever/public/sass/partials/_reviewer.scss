@@ -72,4 +72,21 @@
       margin: 0;
     }
   }
+  &__form.hidden {
+    display: none;
+  }
+  &__edit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    &.hidden {
+      display: none;
+    }
+  }
+  &__edit__button {
+    padding: 0.5rem 1rem;
+    margin-top: 1rem;
+    cursor: pointer;
+  }
 }

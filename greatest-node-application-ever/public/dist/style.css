@@ -1061,6 +1061,22 @@ label {
     margin: 0; }
     .reviewer__errors p {
       margin: 0; }
+  .reviewer__form.hidden {
+    display: none; }
+  .reviewer__edit {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: column;
+        flex-direction: column;
+    -ms-flex-align: center;
+        align-items: center;
+    padding: 2rem; }
+    .reviewer__edit.hidden {
+      display: none; }
+  .reviewer__edit__button {
+    padding: 0.5rem 1rem;
+    margin-top: 1rem;
+    cursor: pointer; }
 
 .pagination {
   display: -ms-flexbox;

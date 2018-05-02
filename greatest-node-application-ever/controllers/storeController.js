@@ -130,8 +130,16 @@ exports.getStoreBySlug = async ( req, res, next ) => {
 
   const reviews = req.body.reviews || []
 
+  let existingReview = null
+  // add a flag to indicate that the logged-in user has already reviewed this store
+  if ( req.user ) {
+    existingReview = reviews.find( review => review.author._id.toString() === req.user._id.toString() )
+  }
+
   // Render the template
-  res.render( 'store', { title: store.name, store, reviews } )
+  res.render( 'store', {
+    title: store.name, store, reviews, existingReview,
+  } )
 }
 
 exports.getStoresByTag = async ( req, res ) => {

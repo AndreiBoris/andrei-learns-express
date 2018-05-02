@@ -1,12 +1,22 @@
-mixin reviewForm( storeId )
+mixin reviewForm( storeId, existingReview = {} )
   if user
+    //- Test if the exisingReview is an empty object
+    - const existingReviewPresent = ! ( h.isEmpty( existingReview ) )
     form.reviewer(action=`/api/reviews/${storeId}` method="POST")
-      //- TODO: Should have label here
-      textarea(name="text" placeholder="Did you try this place? Have something to say? Leave a Review...")
-      .reviewer__meta
-        .reviewer__stars
-          each _, i in Array(5)
-            input(type="checkbox" name=`star${5 - i}`)
-            label(for=`star${5 - i}`)
-        input.button(type="submit" value="Submit Review →")
-      .reviewer__errors.hide
+      .reviewer__edit( class=`${existingReviewPresent ? '' : 'hidden'}`)
+        .reviewer__edit__text
+          | Looks like you had already left a review for this store. Would you like to edit it ❓
+        button.button.reviewer__edit__button(type="button") Edit my Review ✍
+      .reviewer__form( class=`${existingReviewPresent ? 'hidden' : ''}`)
+        //- TODO: Should have label here
+        textarea(name="text" placeholder="Did you try this place? Have something to say? Leave a Review...")
+          = existingReview.text
+        .reviewer__meta
+          .reviewer__stars
+            each _, i in Array(5)
+              - const starValue = 5 - i
+              input(type="checkbox" name=`star${starValue}` checked=( existingReview.rating === starValue ) )
+              label(for=`star${starValue}`)
+          input.button(type="submit" value="Submit Review →")
+        .reviewer__errors.hide
+      

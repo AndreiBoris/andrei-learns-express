@@ -16260,6 +16260,19 @@ var enableReview = function enableReview(reviewForm, reviewList) {
     var stars = Array.from(reviewForm.querySelectorAll('.reviewer__stars [type="checkbox"]'));
     var starLabels = Array.from(reviewForm.querySelectorAll('.reviewer__stars label'));
     var errorDiv = reviewForm.querySelector('.reviewer__errors');
+    // button that users who have previous left a review can use to edit their previous review
+    var editReviewButton = reviewForm.querySelector('.reviewer__edit__button');
+    // Section that users who have previously left a review initially see
+    var reviewEditQuestion = reviewForm.querySelector('.reviewer__edit');
+    // Section that where users can create or edit a review
+    var reviewEditForm = reviewForm.querySelector('.reviewer__form');
+    // Text that users see before or after they edit a review
+    var reviewEditText = reviewForm.querySelector('.reviewer__edit__text');
+
+    editReviewButton.addEventListener('click', function () {
+      reviewEditQuestion.classList.add('hidden');
+      reviewEditForm.classList.remove('hidden');
+    });
 
     starLabels.forEach(function (label) {
       label.on('click', function selectStar() {
@@ -16290,6 +16303,9 @@ var enableReview = function enableReview(reviewForm, reviewList) {
 
         errorDiv.innerHTML = '';
         errorDiv.classList.add('hide');
+        reviewEditText.innerText = 'Your review has been submitted! Click below if you would like to edit your review 🙂';
+        reviewEditQuestion.classList.remove('hidden');
+        reviewEditForm.classList.add('hidden');
         loadReviews(reviewList, data.store);
       }).catch(function (_ref3) {
         var response = _ref3.response;

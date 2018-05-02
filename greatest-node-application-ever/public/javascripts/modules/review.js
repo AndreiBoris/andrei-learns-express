@@ -61,6 +61,19 @@ const enableReview = ( reviewForm, reviewList ) => {
     const stars = Array.from( reviewForm.querySelectorAll( '.reviewer__stars [type="checkbox"]' ) )
     const starLabels = Array.from( reviewForm.querySelectorAll( '.reviewer__stars label' ) )
     const errorDiv = reviewForm.querySelector( '.reviewer__errors' )
+    // button that users who have previous left a review can use to edit their previous review
+    const editReviewButton = reviewForm.querySelector( '.reviewer__edit__button' )
+    // Section that users who have previously left a review initially see
+    const reviewEditQuestion = reviewForm.querySelector( '.reviewer__edit' )
+    // Section that where users can create or edit a review
+    const reviewEditForm = reviewForm.querySelector( '.reviewer__form' )
+    // Text that users see before or after they edit a review
+    const reviewEditText = reviewForm.querySelector( '.reviewer__edit__text' )
+
+    editReviewButton.addEventListener( 'click', () => {
+      reviewEditQuestion.classList.add( 'hidden' )
+      reviewEditForm.classList.remove( 'hidden' )
+    } )
 
     starLabels.forEach( label => {
       label.on( 'click', function selectStar() {
@@ -87,6 +100,9 @@ const enableReview = ( reviewForm, reviewList ) => {
         .then( ( { data } ) => {
           errorDiv.innerHTML = ''
           errorDiv.classList.add( 'hide' )
+          reviewEditText.innerText = 'Your review has been submitted! Click below if you would like to edit your review 🙂'
+          reviewEditQuestion.classList.remove( 'hidden' )
+          reviewEditForm.classList.add( 'hidden' )
           loadReviews( reviewList, data.store )
         } )
         .catch( ( { response } ) => {
