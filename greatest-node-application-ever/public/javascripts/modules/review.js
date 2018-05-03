@@ -1,5 +1,4 @@
 import axios from 'axios'
-import md5 from 'md5'
 import moment from 'moment'
 
 const loadReviews = ( reviewList, storeId ) => {
@@ -15,15 +14,15 @@ const loadReviews = ( reviewList, storeId ) => {
 
           <div class="review__header">
             <div class="review__author">
-              <img class="avatar" src="https://gravatar.com/avatar/${md5( review.author.email )}?s=200&d=retro">
+              <img class="avatar" src="${review.author.gravatar}">
               <span>${review.author.name}</span>
             </div>
             <div class="review__stars">
               ${starRatingHTML}
             </div>
-            <div class="review__time">
+            <time class="review__time">
               ${moment( review.created ).fromNow()}
-            </div>
+            </time>
           </div>
 
           <div class="review__body">

@@ -44,6 +44,7 @@ const storeSchema = new mongoose.Schema(
       required: 'You must supply an author',
     },
   },
+  // Here we make the virtual fields explicitly visible on the Store model ( when they have been populated )
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
