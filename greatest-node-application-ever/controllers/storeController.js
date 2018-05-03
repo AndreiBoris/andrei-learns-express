@@ -124,6 +124,7 @@ exports.getStoreBySlug = async ( req, res, next ) => {
   // Get the store
   const store = await Store.findOne( { slug: req.params.slug } )
     .populate( 'author' )
+    // get all the reviews for this store. NOT strictly necessary as we populate reviews using ajax, but for demonstration purposes
     .populate( { path: 'reviews', populate: { path: 'author', select: 'name email' } } )
 
   if ( !store ) {

@@ -4,45 +4,51 @@ const sanitizeHtml = require( 'sanitize-html' )
 
 mongoose.Promise = global.Promise
 
-const storeSchema = new mongoose.Schema( {
-  name: {
-    type: String,
-    trim: true,
-    required: 'Please enter a store name!',
-  },
-  slug: String,
-  description: {
-    type: String,
-    trim: true,
-  },
-  tags: [ String ],
-  created: {
-    type: Date,
-    default: Date.now,
-  },
-  photo: String,
-  location: {
-    type: {
+const storeSchema = new mongoose.Schema(
+  {
+    name: {
       type: String,
-      default: 'Point',
+      trim: true,
+      required: 'Please enter a store name!',
     },
-    coordinates: [
-      {
-        type: Number,
-        required: 'You must supply coordinates!',
+    slug: String,
+    description: {
+      type: String,
+      trim: true,
+    },
+    tags: [ String ],
+    created: {
+      type: Date,
+      default: Date.now,
+    },
+    photo: String,
+    location: {
+      type: {
+        type: String,
+        default: 'Point',
       },
-    ],
-    address: {
-      type: String,
-      required: 'You must supply an address',
+      coordinates: [
+        {
+          type: Number,
+          required: 'You must supply coordinates!',
+        },
+      ],
+      address: {
+        type: String,
+        required: 'You must supply an address',
+      },
+    },
+    author: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
+      required: 'You must supply an author',
     },
   },
-  author: {
-    type: mongoose.Schema.ObjectId,
-    ref: 'User',
-    required: 'You must supply an author',
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
-} )
+)
 
 // Define our indexes
 storeSchema.index( {
