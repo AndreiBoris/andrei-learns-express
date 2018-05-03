@@ -10,12 +10,7 @@ const { catchErrors } = require( '../handlers/errorHandlers' )
 
 router.get( '/', catchErrors( storeController.getStores ) )
 router.get( '/stores', catchErrors( storeController.getStores ) )
-router.get(
-  '/stores/:slug',
-  catchErrors( storeController.getStoreIdBySlug ),
-  catchErrors( reviewController.grabStoreReviews ),
-  catchErrors( storeController.getStoreBySlug ),
-)
+router.get( '/stores/:slug', catchErrors( storeController.getStoreBySlug ) )
 router.get( '/hearts', authController.isLoggedIn, catchErrors( storeController.getHeartedStores ) )
 router.get( '/top', catchErrors( storeController.topStores ) )
 
@@ -58,6 +53,6 @@ router.get( '/api/search', catchErrors( storeController.searchStores ) )
 router.get( '/api/stores/near', catchErrors( storeController.mapStores ) )
 router.post( '/api/stores/:id/heart', catchErrors( storeController.heartStore ) )
 router.post( '/api/reviews/:id', authController.isLoggedIn, catchErrors( reviewController.addReview ) )
-router.get( '/api/reviews/:id', catchErrors( reviewController.grabStoreReviews ), catchErrors( reviewController.getStoreReviews ) )
+router.get( '/api/reviews/:id', catchErrors( reviewController.getStoreReviews ) )
 
 module.exports = router

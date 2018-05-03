@@ -44,7 +44,7 @@ exports.addReview = async ( req, res ) => {
   res.json( review )
 }
 
-exports.grabStoreReviews = async ( req, res, next ) => {
+exports.getStoreReviews = async ( req, res ) => {
   const reviews = await Review.find( {
     store: req.params.id,
   } )
@@ -52,10 +52,5 @@ exports.grabStoreReviews = async ( req, res, next ) => {
     .populate( 'author', 'name email' )
     .sort( { created: 'descending' } )
 
-  req.body.reviews = reviews
-  next()
-}
-
-exports.getStoreReviews = async ( req, res ) => {
-  res.json( req.body.reviews )
+  res.json( reviews )
 }

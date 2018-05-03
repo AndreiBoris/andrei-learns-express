@@ -8,8 +8,6 @@ const multer = require( 'multer' )
 const jimp = require( 'jimp' )
 const uuid = require( 'uuid' )
 
-const merge = require( 'lodash/merge' )
-
 const multerOptions = {
   storage: multer.memoryStorage(),
   fileFilter( req, file, next ) {
@@ -124,26 +122,25 @@ exports.getStoreIdBySlug = async ( req, res, next ) => {
 
 exports.getStoreBySlug = async ( req, res, next ) => {
   // Get the store
-  const store = await Store.findOne( { slug: req.params.slug } ).populate( 'author' )
+  const store = await Store.findOne( { slug: req.params.slug } )
+    .populate( 'author' )
+    .populate( { path: 'reviews', populate: { path: 'author', select: 'name email' } } )
 
   if ( !store ) {
     next()
     return
   }
 
-  const reviews = req.body.reviews || []
-
   let existingReview = null
   // add a flag to indicate that the logged-in user has already reviewed this store
   if ( req.user ) {
-    existingReview = reviews.find( review => review.author._id.toString() === req.user._id.toString() )
+    existingReview = store.reviews.find( review => review.author._id.toString() === req.user._id.toString() )
   }
 
   // Render the template
   res.render( 'store', {
     title: store.name,
     store,
-    reviews,
     existingReview,
   } )
 }
