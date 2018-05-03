@@ -14,7 +14,7 @@ const loadReviews = ( reviewList, storeId ) => {
           <div class="review__header">
             <div class="review__author">
               <img class="avatar" src="${review.author.gravatar}">
-              <span>${review.author.name}</span>
+              <p>${review.author.name}</p>
             </div>
             <div class="review__stars">
               ${starRatingHTML}
