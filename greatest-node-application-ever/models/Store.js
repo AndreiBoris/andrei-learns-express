@@ -90,11 +90,68 @@ storeSchema.pre( 'save', async function storeSchemaPreSave( next ) {
   next()
 } )
 
-storeSchema.statics.getTagsList = async function storeSchemaGetTagsList() {
+storeSchema.statics.getTagsList = function storeSchemaGetTagsList() {
   return this.aggregate()
     .unwind( 'tags' )
     .group( { _id: '$tags', count: { $sum: 1 } } )
     .sort( { count: 'desc' } )
+}
+
+storeSchema.statics.getTopStores = function storeSchemaGetTopStores() {
+  return this.aggregate( [
+    // Lookup stores and populate their reviews
+    {
+      $lookup: {
+        from: 'reviews',
+        localField: '_id',
+        foreignField: 'store',
+        as: 'reviews',
+      },
+    },
+    // filter for only items that have 2 or more reviews
+    {
+      $addFields: {
+        count: { $size: '$reviews' },
+      },
+    },
+    {
+      $match: {
+        count: { $gt: 1 },
+      },
+    },
+    // add the average reviews field
+    {
+      $addFields: {
+        average: { $avg: '$reviews.rating' },
+      },
+    },
+    // sort it by our new field, highest reviews first
+    {
+      $sort: {
+        average: -1,
+      },
+    },
+    // limit to at most 10
+    {
+      $limit: 10,
+    },
+    // Include only needed fields
+    {
+      $project: {
+        // location: 0,
+        // tags: 0,
+        // description: 0,
+        // reviews: 0,
+        // author: 0,
+        // created: 0,
+        slug: 1,
+        name: 1,
+        photo: 1,
+        count: 1,
+        average: 1,
+      },
+    },
+  ] )
 }
 
 // find reviews where the stores _id property === reviews store property

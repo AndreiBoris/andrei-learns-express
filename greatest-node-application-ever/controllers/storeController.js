@@ -240,55 +240,60 @@ exports.getHeartedStores = async ( req, res ) => {
 }
 
 exports.topStores = async ( req, res ) => {
-  const reviews = await Review
-    // Group reviews by the stores that they belong to, counting the number of reviews and the average rating for each store
-    .aggregate( [
-      {
-        $group: {
-          _id: '$store',
-          count: { $sum: 1 },
-          average: { $avg: '$rating' },
-        },
-      },
-      // There must be at least two reviews for a store for it to show up
-      {
-        $match: {
-          count: { $gt: 1 },
-        },
-      },
-    ] )
-    // Sort the reviews with the highest ratings being at the top regaredless of number of reviews
-    .sort( {
-      average: 'desc',
-    } )
-    // This is a top 10 list
-    .limit( 10 )
+  const top10 = await Store.getTopStores()
 
-  const storeIds = reviews.map( aggregate => aggregate._id )
+  // res.json( top10 )
+  // return
 
-  const stores = await Store.find( {
-    _id: {
-      $in: storeIds,
-    },
-  } )
-    .lean()
-    .select( 'name slug photo' )
+  // const reviews = await Review
+  //   // Group reviews by the stores that they belong to, counting the number of reviews and the average rating for each store
+  //   .aggregate( [
+  // {
+  //   $group: {
+  //     _id: '$store',
+  //     count: { $sum: 1 },
+  //     average: { $avg: '$rating' },
+  //   },
+  // },
+  //     // There must be at least two reviews for a store for it to show up
+  //     {
+  // $match: {
+  //   count: { $gt: 1 },
+  // },
+  //     },
+  //   ] )
+  //   // Sort the reviews with the highest ratings being at the top regaredless of number of reviews
+  // .sort( {
+  //   average: 'desc',
+  // } )
+  //   // This is a top 10 list
+  //   .limit( 10 )
 
-  // Not super efficient but OK when dealing with just a top 10
-  const top10 = reviews.map( review => {
-    // Find the store correspond to this review from the query result
-    const correspondingStore = stores.find( store => review._id.toString() === store._id.toString() )
+  // const storeIds = reviews.map( aggregate => aggregate._id )
 
-    // Avoid exploding if the query did not find the store related to this review aggregation, though this shouldn't really ever occur
-    if ( !correspondingStore ) {
-      return review
-    }
+  // const stores = await Store.find( {
+  //   _id: {
+  //     $in: storeIds,
+  //   },
+  // } )
+  //   .lean()
+  //   .select( 'name slug photo' )
 
-    correspondingStore.count = review.count
-    correspondingStore.average = review.average
+  // // Not super efficient but OK when dealing with just a top 10
+  // const top10 = reviews.map( review => {
+  //   // Find the store correspond to this review from the query result
+  //   const correspondingStore = stores.find( store => review._id.toString() === store._id.toString() )
 
-    return correspondingStore
-  } )
+  //   // Avoid exploding if the query did not find the store related to this review aggregation, though this shouldn't really ever occur
+  //   if ( !correspondingStore ) {
+  //     return review
+  //   }
 
-  res.render( 'top', { title: 'Top Stores', top10 } )
+  //   correspondingStore.count = review.count
+  //   correspondingStore.average = review.average
+
+  //   return correspondingStore
+  // } )
+
+  res.render( 'top', { title: '⭐ Top Stores', top10 } )
 }
