@@ -144,9 +144,8 @@ storeSchema.statics.getTopStores = function storeSchemaGetTopStores() {
         average: -1,
       },
     },
-    // limit to at most 10
     {
-      $limit: 10,
+      $limit: 5,
     },
     // Include only needed fields
     // {

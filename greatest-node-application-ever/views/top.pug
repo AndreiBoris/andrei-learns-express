@@ -2,7 +2,7 @@ extends layout
 
 block content
   .inner
-    h2 Top 10 Stores
+    h2 Top #{stores.length} Stores
     table.table
       thead
         tr
@@ -12,7 +12,7 @@ block content
           td Reviews
           td Average Rating
       tbody
-        each store, i in top10
+        each store, i in stores
           tr
             td 
               a(href=`/stores/${store.slug}`)

@@ -240,7 +240,7 @@ exports.getHeartedStores = async ( req, res ) => {
 }
 
 exports.topStores = async ( req, res ) => {
-  const top10 = await Store.getTopStores()
+  const stores = await Store.getTopStores()
 
   // res.json( top10 )
   // return
@@ -295,5 +295,5 @@ exports.topStores = async ( req, res ) => {
   //   return correspondingStore
   // } )
 
-  res.render( 'top', { title: '⭐ Top Stores', top10 } )
+  res.render( 'top', { title: '⭐ Top Stores', stores } )
 }
