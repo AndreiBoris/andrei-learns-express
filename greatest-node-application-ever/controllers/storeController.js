@@ -2,11 +2,12 @@ const mongoose = require( 'mongoose' )
 
 const Store = mongoose.model( 'Store' )
 const User = mongoose.model( 'User' )
-const Review = mongoose.model( 'Review' )
 
 const multer = require( 'multer' )
 const jimp = require( 'jimp' )
 const uuid = require( 'uuid' )
+
+const sanitization = require( '../sanitization.js' )
 
 const multerOptions = {
   storage: multer.memoryStorage(),
@@ -69,11 +70,51 @@ exports.createStore = async ( req, res ) => {
   res.redirect( `/stores/${store.slug}` )
 }
 
-exports.getStores = async ( req, res ) => {
-  // Query the database for all stores
-  const stores = await Store.find().select( '-location -tags -created' )
+const STORES_PER_PAGE = 6
 
-  res.render( 'stores', { title: 'Stores', stores } )
+const skippedStoresOnPage = ( page = 1, storesPerPage = 12 ) => Math.max( 0, ( page - 1 ) * storesPerPage )
+
+const getNextPage = currentPage => {
+  const nextPage = currentPage + 1
+  return nextPage
+}
+
+const getPreviousPage = currentPage => {
+  const nextPage = Math.max( 1, currentPage - 1 )
+  return nextPage
+}
+
+const createPageLink = ( currentRoute, page ) => {
+  if ( currentRoute.match( /:page$/ ) ) {
+    return currentRoute.replace( /:page$/, page )
+  }
+  return `${currentRoute}/page/${page}`
+}
+
+exports.getStores = async ( req, res, next ) => {
+  const page = sanitization.sanitizePage( req.params.page )
+  const limit = STORES_PER_PAGE
+  const limitPlus1 = STORES_PER_PAGE + 1
+  const skip = skippedStoresOnPage( page, limit )
+
+  // Query the database for all stores
+  const stores = await Store.find( {}, {}, { skip, limit: limitPlus1 } ).select( '-location -tags -created' )
+
+  const pagination = {}
+
+  if ( stores.length === limitPlus1 ) {
+    pagination.next = createPageLink( req.route.path, getNextPage( page ) )
+    stores.pop() // get rid of last store it will be available durin the next query
+  }
+  if ( page !== 1 ) {
+    pagination.prev = createPageLink( req.route.path, getPreviousPage( page ) )
+  }
+
+  if ( !stores.length ) {
+    next()
+  }
+
+  res.render( 'stores', { title: 'Stores', stores, pagination } )
 }
 
 const confirmOwner = ( store, user ) => {
