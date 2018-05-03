@@ -88,27 +88,43 @@ const createPageLink = ( currentRoute, page ) => {
   if ( currentRoute.match( /:page$/ ) ) {
     return currentRoute.replace( /:page$/, page )
   }
-  return `${currentRoute}/page/${page}`
+  const conditionalSlash = currentRoute.match( /\/$/ ) ? '' : '/'
+  let route = currentRoute
+  if ( currentRoute === '/' ) {
+    route = '/stores/'
+  }
+  return `${route}${conditionalSlash}page/${page}`
+}
+
+const paginationObject = ( req, page, pages, count ) => {
+  const pagination = {
+    page,
+    pages,
+    count,
+  }
+  if ( page !== 1 ) {
+    pagination.prev = createPageLink( req.route.path, page - 1 )
+  }
+  if ( page < pages ) {
+    pagination.next = createPageLink( req.route.path, page + 1 )
+  }
+  return pagination
 }
 
 exports.getStores = async ( req, res, next ) => {
   const page = sanitization.sanitizePage( req.params.page )
+  const skip = skippedStoresOnPage( page, STORES_PER_PAGE )
   const limit = STORES_PER_PAGE
-  const limitPlus1 = STORES_PER_PAGE + 1
-  const skip = skippedStoresOnPage( page, limit )
 
   // Query the database for all stores
-  const stores = await Store.find( {}, {}, { skip, limit: limitPlus1 } ).select( '-location -tags -created' )
-
-  const pagination = {}
-
-  if ( stores.length === limitPlus1 ) {
-    pagination.next = createPageLink( req.route.path, getNextPage( page ) )
-    stores.pop() // get rid of last store it will be available durin the next query
-  }
-  if ( page !== 1 ) {
-    pagination.prev = createPageLink( req.route.path, getPreviousPage( page ) )
-  }
+  const storesPromise = Store.find()
+    .skip( skip )
+    .limit( limit )
+    .select( '-location -tags -created' )
+  const countPromise = Store.count()
+  const [ stores, count ] = await Promise.all( [ storesPromise, countPromise ] )
+  const pages = Math.ceil( count / limit )
+  const pagination = paginationObject( req, page, pages, count )
 
   if ( !stores.length ) {
     next()

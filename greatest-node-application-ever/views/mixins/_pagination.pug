@@ -1,0 +1,10 @@
+mixin pagination(page, pages, count, next = null, prev = null)
+  .pagination
+    .pagination__prev
+      if prev
+        a(href=`${prev}`) Prev 
+    .pagination__text
+      p Page #{page} of #{pages} - #{count} total results
+    .pagination__next
+      if next
+        a(href=`${next}`) Next

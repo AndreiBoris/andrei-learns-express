@@ -1,6 +1,7 @@
 extends layout
 
 include mixins/_storeCard
+include mixins/_pagination
 
 block content
   .inner
@@ -8,10 +9,4 @@ block content
     .stores
       each store in stores
         +storeCard( store )
-    .pagination
-      if pagination.prev
-        .pagination__prev
-          a.pagination__text(href=`${pagination.prev}`) Previous Page
-      if pagination.next
-        .pagination__next
-          a.pagination__text(href=`${pagination.next}`) Next Page
+    +pagination( pagination.page, pagination.pages, pagination.count, pagination.next, pagination.prev )
