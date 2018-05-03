@@ -51,4 +51,13 @@ reviewSchema.pre( 'save', async function reviewSchemaPreSave( next ) {
   next()
 } )
 
+// Can use this kind of function to always populate fields inside a model
+function autopopulate( next ) {
+  this.populate( 'author', 'name email' )
+  next()
+}
+
+reviewSchema.pre( 'find', autopopulate )
+reviewSchema.pre( 'findOne', autopopulate )
+
 module.exports = mongoose.model( 'Review', reviewSchema )

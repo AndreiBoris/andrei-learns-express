@@ -51,7 +51,6 @@ exports.getStoreReviews = async ( req, res ) => {
     store: req.params.id,
   } )
     .select( 'rating author text created updated' )
-    .populate( 'author', 'name email' )
     .sort( { created: 'descending' } )
 
   const timeStampedReviews = reviews.map( review => {

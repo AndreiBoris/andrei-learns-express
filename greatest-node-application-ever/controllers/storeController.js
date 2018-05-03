@@ -71,18 +71,9 @@ exports.createStore = async ( req, res ) => {
 
 exports.getStores = async ( req, res ) => {
   // Query the database for all stores
-  const stores = await Store.find()
-    .select( '-location -tags -created' )
-    .populate( 'reviews' )
+  const stores = await Store.find().select( '-location -tags -created' )
 
-  const storesWithReviewsCount = stores.map( store => {
-    const storeWRC = store.toObject()
-    storeWRC.reviewCount = store.reviews.length
-    delete storeWRC.reviews
-    return storeWRC
-  } )
-
-  res.render( 'stores', { title: 'Stores', stores: storesWithReviewsCount } )
+  res.render( 'stores', { title: 'Stores', stores } )
 }
 
 const confirmOwner = ( store, user ) => {
@@ -123,14 +114,12 @@ exports.updateStore = async ( req, res ) => {
 
 exports.getStoreBySlug = async ( req, res, next ) => {
   // Get the store
-  const store = await Store.findOne( { slug: req.params.slug } )
-    .populate( 'author' )
-    // get all the reviews for this store. NOT strictly necessary as we populate reviews using ajax, but for demonstration purposes
-    .populate( { path: 'reviews', populate: { path: 'author', select: 'name email' } } )
+  const store = await Store.findOne( { slug: req.params.slug } ).populate( 'author' )
+  // get all the reviews for this store. NOT strictly necessary as we populate reviews using ajax, but for demonstration purposes
+  // .populate( { path: 'reviews', populate: { path: 'author', select: 'name email' } } )
 
   if ( !store ) {
     next()
-    return
   }
 
   let existingReview = null
@@ -154,24 +143,14 @@ exports.getStoresByTag = async ( req, res ) => {
   const tagQuery = tag || { $exists: true }
 
   const tagsPromise = Store.getTagsList()
-  const storesPromise = Store.find( { tags: tagQuery } )
-    .select( '-location -tags -created' )
-    .populate( 'reviews' )
-
+  const storesPromise = Store.find( { tags: tagQuery } ).select( '-location -tags -created' )
   const [ tags, stores ] = await Promise.all( [ tagsPromise, storesPromise ] )
-
-  const storesWithReviewsCount = stores.map( store => {
-    const storeWRC = store.toObject()
-    storeWRC.reviewCount = store.reviews.length
-    delete storeWRC.reviews
-    return storeWRC
-  } )
 
   res.render( 'tag', {
     title: 'Tags',
     tags,
     tag,
-    stores: storesWithReviewsCount,
+    stores,
   } )
 }
 
@@ -251,22 +230,13 @@ exports.getHeartedStores = async ( req, res ) => {
     _id: {
       $in: req.user.hearts,
     },
-  } )
-    .select( '-location -tags -created' )
-    .populate( 'reviews' )
-
-  const storesWithReviewsCount = stores.map( store => {
-    const storeWRC = store.toObject()
-    storeWRC.reviewCount = store.reviews.length
-    delete storeWRC.reviews
-    return storeWRC
-  } )
+  } ).select( '-location -tags -created' )
 
   // Alternate way of doing this:
   // const user = await User.findOne( { _id: req.user._id } ).populate( 'hearts' )
   // const { hearts: stores } = user
 
-  res.render( 'stores', { title: 'Hearts', stores: storesWithReviewsCount } )
+  res.render( 'stores', { title: 'Hearts', stores } )
 }
 
 exports.topStores = async ( req, res ) => {
