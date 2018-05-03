@@ -109,6 +109,7 @@ storeSchema.statics.getTopStores = function storeSchemaGetTopStores() {
       },
     },
     // filter for only items that have 2 or more reviews
+
     {
       $addFields: {
         count: { $size: '$reviews' },
@@ -119,9 +120,21 @@ storeSchema.statics.getTopStores = function storeSchemaGetTopStores() {
         count: { $gt: 1 },
       },
     },
+    // ALTERNATIVELY can check if the review at index 1 exists, indicating 2 or more reviews
+    // { $match: { 'reviews.1': { $exists: true } } },
     // add the average reviews field
+    // {
+    //   $addFields: {
+    //     average: { $avg: '$reviews.rating' },
+    //   },
+    // },
+    // ALTERNATIVELY can use project to add fields like this
     {
-      $addFields: {
+      $project: {
+        photo: '$$ROOT.photo',
+        name: '$$ROOT.name',
+        count: '$$ROOT.count',
+        slug: '$$ROOT.slug',
         average: { $avg: '$reviews.rating' },
       },
     },
@@ -136,21 +149,15 @@ storeSchema.statics.getTopStores = function storeSchemaGetTopStores() {
       $limit: 10,
     },
     // Include only needed fields
-    {
-      $project: {
-        // location: 0,
-        // tags: 0,
-        // description: 0,
-        // reviews: 0,
-        // author: 0,
-        // created: 0,
-        slug: 1,
-        name: 1,
-        photo: 1,
-        count: 1,
-        average: 1,
-      },
-    },
+    // {
+    //   $project: {
+    //     slug: 1,
+    //     name: 1,
+    //     photo: 1,
+    //     count: 1,
+    //     average: 1,
+    //   },
+    // },
   ] )
 }
 
