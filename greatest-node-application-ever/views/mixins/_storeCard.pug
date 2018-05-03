@@ -9,6 +9,10 @@ mixin storeCard( store = {} )
               - const alreadyHearted = heartStrings.includes(store._id.toString())
               button.heart__button(type="submit" name="heart" class=( alreadyHearted ? 'heart__button--hearted' : '' ))
                  != h.icon('heart')
+        if store.reviewCount > 0
+          .store__action.store__action--review
+            != h.icon('review')
+            | #{store.reviewCount}
         if user && store.author.equals( user._id ) 
           .store__action.store__action--edit
             a(href=`/stores/${store._id}/edit`)

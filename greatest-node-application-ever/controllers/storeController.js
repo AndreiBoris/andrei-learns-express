@@ -72,8 +72,17 @@ exports.createStore = async ( req, res ) => {
 exports.getStores = async ( req, res ) => {
   // Query the database for all stores
   const stores = await Store.find()
+    .select( '-location -tags -created' )
+    .populate( 'reviews' )
 
-  res.render( 'stores', { title: 'Stores', stores } )
+  const storesWithReviewsCount = stores.map( store => {
+    const storeWRC = store.toObject()
+    storeWRC.reviewCount = store.reviews.length
+    delete storeWRC.reviews
+    return storeWRC
+  } )
+
+  res.render( 'stores', { title: 'Stores', stores: storesWithReviewsCount } )
 }
 
 const confirmOwner = ( store, user ) => {
@@ -112,14 +121,6 @@ exports.updateStore = async ( req, res ) => {
   res.redirect( `/stores/${store._id}/edit` )
 }
 
-exports.getStoreIdBySlug = async ( req, res, next ) => {
-  const store = await Store.findOne( { slug: req.params.slug } ).select( '_id' )
-
-  req.params.id = store._id
-
-  next()
-}
-
 exports.getStoreBySlug = async ( req, res, next ) => {
   // Get the store
   const store = await Store.findOne( { slug: req.params.slug } )
@@ -154,13 +155,23 @@ exports.getStoresByTag = async ( req, res ) => {
 
   const tagsPromise = Store.getTagsList()
   const storesPromise = Store.find( { tags: tagQuery } )
+    .select( '-location -tags -created' )
+    .populate( 'reviews' )
+
   const [ tags, stores ] = await Promise.all( [ tagsPromise, storesPromise ] )
+
+  const storesWithReviewsCount = stores.map( store => {
+    const storeWRC = store.toObject()
+    storeWRC.reviewCount = store.reviews.length
+    delete storeWRC.reviews
+    return storeWRC
+  } )
 
   res.render( 'tag', {
     title: 'Tags',
     tags,
     tag,
-    stores,
+    stores: storesWithReviewsCount,
   } )
 }
 
@@ -241,12 +252,21 @@ exports.getHeartedStores = async ( req, res ) => {
       $in: req.user.hearts,
     },
   } )
+    .select( '-location -tags -created' )
+    .populate( 'reviews' )
+
+  const storesWithReviewsCount = stores.map( store => {
+    const storeWRC = store.toObject()
+    storeWRC.reviewCount = store.reviews.length
+    delete storeWRC.reviews
+    return storeWRC
+  } )
 
   // Alternate way of doing this:
   // const user = await User.findOne( { _id: req.user._id } ).populate( 'hearts' )
   // const { hearts: stores } = user
 
-  res.render( 'stores', { title: 'Hearts', stores } )
+  res.render( 'stores', { title: 'Hearts', stores: storesWithReviewsCount } )
 }
 
 exports.topStores = async ( req, res ) => {
