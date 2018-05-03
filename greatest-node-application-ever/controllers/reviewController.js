@@ -6,6 +6,8 @@ const User = mongoose.model( 'User' )
 
 const appValidation = require( '../validation' )
 
+const moment = require( 'moment' )
+
 exports.addReview = async ( req, res ) => {
   appValidation.validateReview( req )
 
@@ -52,5 +54,12 @@ exports.getStoreReviews = async ( req, res ) => {
     .populate( 'author', 'name email' )
     .sort( { created: 'descending' } )
 
-  res.json( reviews )
+  const timeStampedReviews = reviews.map( review => {
+    const tsReview = review.toObject()
+    tsReview.createdHuman = moment( tsReview.created ).fromNow()
+    tsReview.updatedHuman = moment( tsReview.updated ).fromNow()
+    return tsReview
+  } )
+
+  res.json( timeStampedReviews )
 }

@@ -1,5 +1,4 @@
 import axios from 'axios'
-import moment from 'moment'
 
 const loadReviews = ( reviewList, storeId ) => {
   axios
@@ -21,7 +20,7 @@ const loadReviews = ( reviewList, storeId ) => {
               ${starRatingHTML}
             </div>
             <time class="review__time">
-              ${moment( review.created ).fromNow()}
+              ${review.createdHuman}
             </time>
           </div>
 
@@ -29,8 +28,8 @@ const loadReviews = ( reviewList, storeId ) => {
             <p>${review.text}</p>
           </div>
 
-          <div class="review__meta ${review.updated === review.created ? 'hide' : ''}">
-            Last updated ${moment( review.updated ).fromNow()}
+          <div class="review__meta ${review.created === review.updated ? 'hide' : ''}">
+            Last updated ${review.updatedHuman}
           </div>
         </div>
         `
@@ -76,7 +75,6 @@ const enableReview = ( reviewForm, reviewList ) => {
     //     associatedStar.checked = true
     //   } )
     // } )
-
     reviewForm.on( 'submit', function submitReviewForm( ev ) {
       ev.preventDefault()
       const rating = this.rating.value // getStarRating( stars )
