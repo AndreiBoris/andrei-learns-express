@@ -250,6 +250,12 @@ exports.topStores = async ( req, res ) => {
           average: { $avg: '$rating' },
         },
       },
+      // There must be at least two reviews for a store for it to show up
+      {
+        $match: {
+          count: { $gt: 1 },
+        },
+      },
     ] )
     // Sort the reviews with the highest ratings being at the top regaredless of number of reviews
     .sort( {
@@ -270,8 +276,10 @@ exports.topStores = async ( req, res ) => {
 
   // Not super efficient but OK when dealing with just a top 10
   const top10 = reviews.map( review => {
+    // Find the store correspond to this review from the query result
     const correspondingStore = stores.find( store => review._id.toString() === store._id.toString() )
 
+    // Avoid exploding if the query did not find the store related to this review aggregation, though this shouldn't really ever occur
     if ( !correspondingStore ) {
       return review
     }
