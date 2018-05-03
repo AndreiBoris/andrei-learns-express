@@ -6,9 +6,7 @@ const loadReviews = ( reviewList, storeId ) => {
     .then( ( { data } ) => {
       /* eslint-disable no-param-reassign */
       reviewList.innerHTML = data
-        .map( review => {
-          const starRatingHTML = [ 1, 2, 3, 4, 5 ].map( number => `${number <= review.rating ? '★' : '☆'}` ).join( '' )
-          return `
+        .map( review => `
         <div class="review">
 
           <div class="review__header">
@@ -16,8 +14,9 @@ const loadReviews = ( reviewList, storeId ) => {
               <img class="avatar" src="${review.author.gravatar}">
               <p>${review.author.name}</p>
             </div>
-            <div class="review__stars">
-              ${starRatingHTML}
+            <div class="review__stars" title="Rated ${review.rating} out of 5 stars">
+              ${'★'.repeat( review.rating )}${'☆'.repeat( 5 - review.rating )}
+              
             </div>
             <time class="review__time">
               ${review.createdHuman}
@@ -32,8 +31,7 @@ const loadReviews = ( reviewList, storeId ) => {
             Last updated ${review.updatedHuman}
           </div>
         </div>
-        `
-        } )
+        ` )
         .join( '' )
       /* eslint-enable */
     } )

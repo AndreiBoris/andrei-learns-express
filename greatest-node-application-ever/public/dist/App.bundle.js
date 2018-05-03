@@ -1390,10 +1390,7 @@ var loadReviews = function loadReviews(reviewList, storeId) {
 
     /* eslint-disable no-param-reassign */
     reviewList.innerHTML = data.map(function (review) {
-      var starRatingHTML = [1, 2, 3, 4, 5].map(function (number) {
-        return '' + (number <= review.rating ? '★' : '☆');
-      }).join('');
-      return '\n        <div class="review">\n\n          <div class="review__header">\n            <div class="review__author">\n              <img class="avatar" src="' + review.author.gravatar + '">\n              <p>' + review.author.name + '</p>\n            </div>\n            <div class="review__stars">\n              ' + starRatingHTML + '\n            </div>\n            <time class="review__time">\n              ' + review.createdHuman + '\n            </time>\n          </div>\n\n          <div class="review__body">\n            <p>' + review.text + '</p>\n          </div>\n\n          <div class="review__meta ' + (review.created === review.updated ? 'hide' : '') + '">\n            Last updated ' + review.updatedHuman + '\n          </div>\n        </div>\n        ';
+      return '\n        <div class="review">\n\n          <div class="review__header">\n            <div class="review__author">\n              <img class="avatar" src="' + review.author.gravatar + '">\n              <p>' + review.author.name + '</p>\n            </div>\n            <div class="review__stars" title="Rated ' + review.rating + ' out of 5 stars">\n              ' + '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating) + '\n              \n            </div>\n            <time class="review__time">\n              ' + review.createdHuman + '\n            </time>\n          </div>\n\n          <div class="review__body">\n            <p>' + review.text + '</p>\n          </div>\n\n          <div class="review__meta ' + (review.created === review.updated ? 'hide' : '') + '">\n            Last updated ' + review.updatedHuman + '\n          </div>\n        </div>\n        ';
     }).join('');
     /* eslint-enable */
   }).catch(console.error);
