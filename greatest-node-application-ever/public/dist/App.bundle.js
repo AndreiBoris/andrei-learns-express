@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 32);
+/******/ 	return __webpack_require__(__webpack_require__.s = 34);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -374,10 +374,19 @@ module.exports = {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
+
+
+module.exports = __webpack_require__(16);
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
 /* WEBPACK VAR INJECTION */(function(process) {
 
 var utils = __webpack_require__(0);
-var normalizeHeaderName = __webpack_require__(28);
+var normalizeHeaderName = __webpack_require__(30);
 
 var PROTECTION_PREFIX = /^\)\]\}',?\n/;
 var DEFAULT_CONTENT_TYPE = {
@@ -465,7 +474,7 @@ module.exports = defaults;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -501,15 +510,6 @@ exports.$ = $;
 exports.$$ = $$;
 
 /***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = __webpack_require__(14);
-
-/***/ }),
 /* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -517,12 +517,12 @@ module.exports = __webpack_require__(14);
 /* WEBPACK VAR INJECTION */(function(process) {
 
 var utils = __webpack_require__(0);
-var settle = __webpack_require__(20);
-var buildURL = __webpack_require__(23);
-var parseHeaders = __webpack_require__(29);
-var isURLSameOrigin = __webpack_require__(27);
+var settle = __webpack_require__(22);
+var buildURL = __webpack_require__(25);
+var parseHeaders = __webpack_require__(31);
+var isURLSameOrigin = __webpack_require__(29);
 var createError = __webpack_require__(7);
-var btoa = typeof window !== 'undefined' && window.btoa && window.btoa.bind(window) || __webpack_require__(22);
+var btoa = typeof window !== 'undefined' && window.btoa && window.btoa.bind(window) || __webpack_require__(24);
 
 module.exports = function xhrAdapter(config) {
   return new Promise(function dispatchXhrRequest(resolve, reject) {
@@ -615,7 +615,7 @@ module.exports = function xhrAdapter(config) {
     // This is only done if running in a standard browser environment.
     // Specifically not if we're in a web worker, or react-native.
     if (utils.isStandardBrowserEnv()) {
-      var cookies = __webpack_require__(25);
+      var cookies = __webpack_require__(27);
 
       // Add xsrf header
       var xsrfValue = (config.withCredentials || isURLSameOrigin(config.url)) && config.xsrfCookieName ? cookies.read(config.xsrfCookieName) : undefined;
@@ -732,7 +732,7 @@ module.exports = function isCancel(value) {
 "use strict";
 
 
-var enhanceError = __webpack_require__(19);
+var enhanceError = __webpack_require__(21);
 
 /**
  * Create an Error with the specified message, config, error code, and response.
@@ -1007,13 +1007,86 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-var _axios = __webpack_require__(3);
+var _axios = __webpack_require__(1);
 
 var _axios2 = _interopRequireDefault(_axios);
 
-var _bling = __webpack_require__(2);
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var counterDiv = void 0;
+
+function updateHeartCounter(counter, count) {
+  if (!counter) return;
+
+  /* eslint-disable no-param-reassign */
+  counter.innerText = count;
+  /* eslint-enable */
+}
+
+function updateHeartButton(button, pressed) {
+  if (pressed) {
+    button.classList.add('heart__button--hearted');
+  } else {
+    button.classList.remove('heart__button--hearted');
+  }
+}
+
+function handleHeartFormSubmit(ev) {
+  var _this = this;
+
+  ev.preventDefault();
+
+  var postUrl = this.action;
+
+  _axios2.default.post(postUrl).then(function (_ref) {
+    var data = _ref.data;
+
+    updateHeartCounter(counterDiv, data.user.hearts.length);
+    var isHearted = data.user.hearts.includes(data.storeId);
+    updateHeartButton(_this.heart, isHearted);
+    if (isHearted) {
+      _this.heart.classList.add('heart__button--float');
+      // Once the animation ends, remove the float class
+      _this.heart.addEventListener('animationend', function (event) {
+        console.log('HEART HAS FLOWN');
+        if (event.animationName === 'fly') {
+          _this.heart.classList.remove('heart__button--float');
+        }
+      }, {
+        once: true
+      });
+    }
+  }).catch(console.error);
+}
+
+var toggleHeart = function toggleHeart(counterDivSelected, heartForms) {
+  counterDiv = counterDivSelected;
+
+  heartForms.forEach(function (form) {
+    form.on('submit', handleHeartFormSubmit);
+  });
+};
+
+exports.default = toggleHeart;
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _axios = __webpack_require__(1);
+
+var _axios2 = _interopRequireDefault(_axios);
+
+var _bling = __webpack_require__(3);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1185,7 +1258,7 @@ exports.default = makeMap;
 // export default mapStores
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1195,11 +1268,114 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _axios = __webpack_require__(3);
+var _axios = __webpack_require__(1);
 
 var _axios2 = _interopRequireDefault(_axios);
 
-var _dompurify = __webpack_require__(31);
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var loadReviews = function loadReviews(reviewList, storeId) {
+  _axios2.default.get('/api/reviews/' + storeId).then(function (_ref) {
+    var data = _ref.data;
+
+    /* eslint-disable no-param-reassign */
+    reviewList.innerHTML = data.map(function (review) {
+      return '\n        <div class="review">\n\n          <div class="review__header">\n            <div class="review__author">\n              <img class="avatar" src="' + review.author.gravatar + '">\n              <p>' + review.author.name + '</p>\n            </div>\n            <div class="review__stars" title="Rated ' + review.rating + ' out of 5 stars">\n              ' + '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating) + '\n              \n            </div>\n            <time class="review__time">\n              ' + review.createdHuman + '\n            </time>\n          </div>\n\n          <div class="review__body">\n            <p>' + review.text + '</p>\n          </div>\n\n          <div class="review__meta ' + (review.created === review.updated ? 'hide' : '') + '">\n            Last updated ' + review.updatedHuman + '\n          </div>\n        </div>\n        ';
+    }).join('');
+    /* eslint-enable */
+  }).catch(console.error);
+};
+
+var enableReview = function enableReview(reviewForm, reviewList) {
+  if (!reviewList) return;
+
+  loadReviews(reviewList, reviewList.dataset.storeId);
+
+  // Can only add listener if the reviewForm is on the page, indicating a logged-in user
+  if (reviewForm) {
+    // const stars = Array.from( reviewForm.querySelectorAll( '.reviewer__stars [type="checkbox"]' ) )
+    // const starLabels = Array.from( reviewForm.querySelectorAll( '.reviewer__stars label' ) )
+    var errorDiv = reviewForm.querySelector('.reviewer__errors');
+    // button that users who have previous left a review can use to edit their previous review
+    var editReviewButton = reviewForm.querySelector('.reviewer__edit__button');
+    // Section that users who have previously left a review initially see
+    var reviewEditQuestion = reviewForm.querySelector('.reviewer__edit');
+    // Section that where users can create or edit a review
+    var reviewEditForm = reviewForm.querySelector('.reviewer__form');
+    // Text that users see before or after they edit a review
+    var reviewEditText = reviewForm.querySelector('.reviewer__edit__text');
+
+    editReviewButton.addEventListener('click', function () {
+      reviewEditQuestion.classList.add('hidden');
+      reviewEditForm.classList.remove('hidden');
+    });
+
+    // starLabels.forEach( label => {
+    //   label.on( 'click', function selectStar() {
+    //     const associatedStar = stars.find( star => star.name === this.getAttribute( 'for' ) )
+    //     stars.forEach( star => {
+    //       /* eslint-disable no-param-reassign */
+    //       star.checked = false
+    //       /* eslint-enable */
+    //     } )
+    //     associatedStar.checked = true
+    //   } )
+    // } )
+    reviewForm.on('submit', function submitReviewForm(ev) {
+      ev.preventDefault();
+      var rating = this.rating.value; // getStarRating( stars )
+      var text = this.text.value;
+
+      _axios2.default.post(this.action, {
+        rating: rating,
+        text: text
+      }).then(function (_ref2) {
+        var data = _ref2.data;
+
+        errorDiv.innerHTML = '';
+        errorDiv.classList.add('hide');
+        reviewEditText.innerText = 'Your review has been submitted! Click below if you would like to edit your review 🙂';
+        reviewEditQuestion.classList.remove('hidden');
+        reviewEditForm.classList.add('hidden');
+        loadReviews(reviewList, data.store);
+      }).catch(function (_ref3) {
+        var response = _ref3.response;
+        var status = response.status,
+            data = response.data;
+
+        if (status === 422) {
+          if (Array.isArray(data)) {
+            errorDiv.innerHTML = data.map(function (validationError) {
+              return '\n              <p>\n                ' + validationError + '\n              </p>\n              ';
+            }).join('');
+            errorDiv.classList.remove('hide');
+          }
+          return;
+        }
+        console.error(response);
+      });
+    });
+  }
+};
+
+exports.default = enableReview;
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _axios = __webpack_require__(1);
+
+var _axios2 = _interopRequireDefault(_axios);
+
+var _dompurify = __webpack_require__(33);
 
 var _dompurify2 = _interopRequireDefault(_dompurify);
 
@@ -1314,13 +1490,13 @@ function typeAhead(search) {
 exports.default = typeAhead;
 
 /***/ }),
-/* 13 */
+/* 15 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
 
 /***/ }),
-/* 14 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1328,8 +1504,8 @@ exports.default = typeAhead;
 
 var utils = __webpack_require__(0);
 var bind = __webpack_require__(8);
-var Axios = __webpack_require__(16);
-var defaults = __webpack_require__(1);
+var Axios = __webpack_require__(18);
+var defaults = __webpack_require__(2);
 
 /**
  * Create an instance of Axios
@@ -1363,14 +1539,14 @@ axios.create = function create(instanceConfig) {
 
 // Expose Cancel & CancelToken
 axios.Cancel = __webpack_require__(5);
-axios.CancelToken = __webpack_require__(15);
+axios.CancelToken = __webpack_require__(17);
 axios.isCancel = __webpack_require__(6);
 
 // Expose all/spread
 axios.all = function all(promises) {
   return Promise.all(promises);
 };
-axios.spread = __webpack_require__(30);
+axios.spread = __webpack_require__(32);
 
 module.exports = axios;
 
@@ -1378,7 +1554,7 @@ module.exports = axios;
 module.exports.default = axios;
 
 /***/ }),
-/* 15 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1441,18 +1617,18 @@ CancelToken.source = function source() {
 module.exports = CancelToken;
 
 /***/ }),
-/* 16 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var defaults = __webpack_require__(1);
+var defaults = __webpack_require__(2);
 var utils = __webpack_require__(0);
-var InterceptorManager = __webpack_require__(17);
-var dispatchRequest = __webpack_require__(18);
-var isAbsoluteURL = __webpack_require__(26);
-var combineURLs = __webpack_require__(24);
+var InterceptorManager = __webpack_require__(19);
+var dispatchRequest = __webpack_require__(20);
+var isAbsoluteURL = __webpack_require__(28);
+var combineURLs = __webpack_require__(26);
 
 /**
  * Create a new instance of Axios
@@ -1532,7 +1708,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 module.exports = Axios;
 
 /***/ }),
-/* 17 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1590,16 +1766,16 @@ InterceptorManager.prototype.forEach = function forEach(fn) {
 module.exports = InterceptorManager;
 
 /***/ }),
-/* 18 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var utils = __webpack_require__(0);
-var transformData = __webpack_require__(21);
+var transformData = __webpack_require__(23);
 var isCancel = __webpack_require__(6);
-var defaults = __webpack_require__(1);
+var defaults = __webpack_require__(2);
 
 /**
  * Throws a `Cancel` if cancellation has been requested.
@@ -1656,7 +1832,7 @@ module.exports = function dispatchRequest(config) {
 };
 
 /***/ }),
-/* 19 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1682,7 +1858,7 @@ module.exports = function enhanceError(error, config, code, response) {
 };
 
 /***/ }),
-/* 20 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1708,7 +1884,7 @@ module.exports = function settle(resolve, reject, response) {
 };
 
 /***/ }),
-/* 21 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1734,7 +1910,7 @@ module.exports = function transformData(data, headers, fns) {
 };
 
 /***/ }),
-/* 22 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1775,7 +1951,7 @@ function btoa(input) {
 module.exports = btoa;
 
 /***/ }),
-/* 23 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1842,7 +2018,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
 };
 
 /***/ }),
-/* 24 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1861,7 +2037,7 @@ module.exports = function combineURLs(baseURL, relativeURL) {
 };
 
 /***/ }),
-/* 25 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1920,7 +2096,7 @@ function nonStandardBrowserEnv() {
 }();
 
 /***/ }),
-/* 26 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1942,7 +2118,7 @@ module.exports = function isAbsoluteURL(url) {
 };
 
 /***/ }),
-/* 27 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2011,7 +2187,7 @@ function nonStandardBrowserEnv() {
 }();
 
 /***/ }),
-/* 28 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2029,7 +2205,7 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
 };
 
 /***/ }),
-/* 29 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2074,7 +2250,7 @@ module.exports = function parseHeaders(headers) {
 };
 
 /***/ }),
-/* 30 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2108,7 +2284,7 @@ module.exports = function spread(callback) {
 };
 
 /***/ }),
-/* 31 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2921,31 +3097,35 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 32 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-__webpack_require__(13);
+__webpack_require__(15);
 
-var _bling = __webpack_require__(2);
+var _bling = __webpack_require__(3);
 
 var _autocomplete = __webpack_require__(10);
 
 var _autocomplete2 = _interopRequireDefault(_autocomplete);
 
-var _typeAhead = __webpack_require__(12);
+var _typeAhead = __webpack_require__(14);
 
 var _typeAhead2 = _interopRequireDefault(_typeAhead);
 
-var _mapStores = __webpack_require__(11);
+var _mapStores = __webpack_require__(12);
 
 var _mapStores2 = _interopRequireDefault(_mapStores);
 
-var _heart = __webpack_require__(39);
+var _heart = __webpack_require__(11);
 
 var _heart2 = _interopRequireDefault(_heart);
+
+var _review = __webpack_require__(13);
+
+var _review2 = _interopRequireDefault(_review);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2953,85 +3133,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 (0, _typeAhead2.default)((0, _bling.$)('.search'));
 (0, _mapStores2.default)((0, _bling.$)('#map'));
 (0, _heart2.default)((0, _bling.$)('.heart-count'), (0, _bling.$$)('form.heart'));
-
-/***/ }),
-/* 33 */,
-/* 34 */,
-/* 35 */,
-/* 36 */,
-/* 37 */,
-/* 38 */,
-/* 39 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _axios = __webpack_require__(3);
-
-var _axios2 = _interopRequireDefault(_axios);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var counterDiv = void 0;
-
-function updateHeartCounter(counter, count) {
-  if (!counter) return;
-
-  /* eslint-disable no-param-reassign */
-  counter.innerText = count;
-  /* eslint-enable */
-}
-
-function updateHeartButton(button, pressed) {
-  if (pressed) {
-    button.classList.add('heart__button--hearted');
-  } else {
-    button.classList.remove('heart__button--hearted');
-  }
-}
-
-function handleHeartFormSubmit(ev) {
-  var _this = this;
-
-  ev.preventDefault();
-
-  var postUrl = this.action;
-
-  _axios2.default.post(postUrl).then(function (_ref) {
-    var data = _ref.data;
-
-    updateHeartCounter(counterDiv, data.user.hearts.length);
-    var isHearted = data.user.hearts.includes(data.storeId);
-    updateHeartButton(_this.heart, isHearted);
-    if (isHearted) {
-      _this.heart.classList.add('heart__button--float');
-      // Once the animation ends, remove the float class
-      _this.heart.addEventListener('animationend', function (event) {
-        console.log('HEART HAS FLOWN');
-        if (event.animationName === 'fly') {
-          _this.heart.classList.remove('heart__button--float');
-        }
-      }, {
-        once: true
-      });
-    }
-  }).catch(console.error);
-}
-
-var toggleHeart = function toggleHeart(counterDivSelected, heartForms) {
-  counterDiv = counterDivSelected;
-
-  heartForms.forEach(function (form) {
-    form.on('submit', handleHeartFormSubmit);
-  });
-};
-
-exports.default = toggleHeart;
+(0, _review2.default)((0, _bling.$)('.reviewer'), (0, _bling.$)('.reviews'));
 
 /***/ })
 /******/ ]);

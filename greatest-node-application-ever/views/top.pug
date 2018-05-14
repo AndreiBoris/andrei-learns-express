@@ -1,0 +1,23 @@
+extends layout
+
+block content
+  .inner
+    h2 Top #{stores.length} Stores
+    table.table
+      thead
+        tr
+          td Store
+          td Ranking
+          td Name
+          td Reviews
+          td Average Rating
+      tbody
+        each store, i in stores
+          tr
+            td 
+              a(href=`/stores/${store.slug}`)
+                img(src=`/uploads/${store.photo || 'store.png'}` alt=store.name width=200)
+            td= i + 1
+            td= store.name
+            td= store.count
+            td= store.average.toFixed(1)

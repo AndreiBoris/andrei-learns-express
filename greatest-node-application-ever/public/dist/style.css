@@ -953,7 +953,7 @@ label {
   .review:before {
     width: 5px;
     left: 0;
-    content: '';
+    content: "";
     display: block;
     background: linear-gradient(0, #48ded4 0%, #a026bf 20%, #e82c75 60%, #FFC40E 85%, #48ded4 95%);
     position: absolute;
@@ -984,12 +984,12 @@ label {
     display: flex; }
     .review__author .avatar {
       margin-right: 2rem; }
-  .review__time {
+  .review__time, .review__meta {
     font-size: 1.2rem;
     color: #999999; }
   .review__stars {
     color: #FFC40E; }
-  .review__body {
+  .review__body, .review__meta {
     padding: 2rem; }
   .review p {
     white-space: pre-wrap; }
@@ -999,7 +999,7 @@ label {
  */
 .reviewer {
   position: relative;
-  box-shadow: 0 0px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   margin-bottom: 2rem; }
   .reviewer__stars {
     display: -ms-flexbox;
@@ -1017,7 +1017,7 @@ label {
            This is fine for accessibility because our labels have for()
          */ }
         .reviewer__stars input + label:before {
-          content: '\2605';
+          content: "\2605";
           font-size: 2rem; }
         .reviewer__stars input + label[for="star5"] {
           -ms-flex-order: 5;
@@ -1034,7 +1034,8 @@ label {
         .reviewer__stars input + label[for="star1"] {
           -ms-flex-order: 1;
               order: 1; }
-        .reviewer__stars input + label:hover, .reviewer__stars input + label:hover ~ label {
+        .reviewer__stars input + label:hover,
+        .reviewer__stars input + label:hover ~ label {
           color: #ffdd74; }
   .reviewer textarea {
     border: 0;
@@ -1053,10 +1054,35 @@ label {
     .reviewer__meta > * {
       -ms-flex: 1;
           flex: 1; }
+  .reviewer__errors {
+    border-top: 1px solid #e6e6e6;
+    color: #E50714;
+    padding: 0 2rem;
+    margin: 0; }
+    .reviewer__errors p {
+      margin: 0; }
+  .reviewer__form.hidden {
+    display: none; }
+  .reviewer__edit {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: column;
+        flex-direction: column;
+    -ms-flex-align: center;
+        align-items: center;
+    padding: 2rem; }
+    .reviewer__edit.hidden {
+      display: none; }
+  .reviewer__edit__button {
+    padding: 0.5rem 1rem;
+    margin-top: 1rem;
+    cursor: pointer; }
 
 .pagination {
   display: -ms-flexbox;
   display: flex;
+  -ms-flex-pack: center;
+      justify-content: center;
   -ms-flex-align: center;
       align-items: center;
   background: white;
@@ -1069,14 +1095,14 @@ label {
     padding: 1rem 3rem 1rem 1rem; }
     .pagination__next a:after {
       margin-left: 1rem;
-      content: '\2192'; }
+      content: "\2192"; }
   .pagination__prev {
     -ms-flex: 0 0 auto;
         flex: 0 0 auto;
     padding: 1rem 1rem 1rem 3rem; }
     .pagination__prev a:before {
       margin-right: 1rem;
-      content: '\2190'; }
+      content: "\2190"; }
   .pagination__text {
     -ms-flex: 3 0 auto;
         flex: 3 0 auto;

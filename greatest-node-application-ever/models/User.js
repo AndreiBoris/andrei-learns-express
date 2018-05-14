@@ -9,34 +9,44 @@ const validator = require( 'validator' )
 const mongodbErrorHandler = require( 'mongoose-mongodb-errors' )
 const passportLocalMongoose = require( 'passport-local-mongoose' )
 
-const userSchema = new Schema( {
-  email: {
-    type: String,
-    unique: true,
-    lowercase: true,
-    trim: true,
-    validate: [ validator.isEmail, 'Invalid Email Address' ],
-    required: 'Please supply an email address',
-  },
-  name: {
-    type: String,
-    required: 'Please supply a name',
-    trim: true,
-  },
-  resetPasswordToken: String,
-  resetPasswordExpires: Date,
-  hearts: [
-    {
-      type: mongoose.Schema.ObjectId,
-      ref: 'Store',
+const userSchema = new Schema(
+  {
+    email: {
+      type: String,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      validate: [ validator.isEmail, 'Invalid Email Address' ],
+      required: 'Please supply an email address',
     },
-  ],
-} )
+    name: {
+      type: String,
+      required: 'Please supply a name',
+      trim: true,
+    },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
+    hearts: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Store',
+      },
+    ],
+  },
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
+)
 
 userSchema.virtual( 'gravatar' ).get( function userGravatar() {
+  // If email is not selected, we won't be able to generate the gravatar
+  if ( !this.email ) {
+    return
+  }
   // Use a hash to avoid showing the user's email address when creating the gravatar field
   const hash = md5( this.email )
-  return `https://gravatar.com/avatar/${hash}?s=200`
+  return `https://gravatar.com/avatar/${hash}?s=200&d=retro`
 } )
 
 //

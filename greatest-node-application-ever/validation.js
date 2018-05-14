@@ -29,6 +29,11 @@ exports.validatePassword = req => {
     .equals( req.body.password )
 }
 
+exports.validateReview = req => {
+  req.checkBody( 'text', 'Please include a short review ✍' ).isLength( { min: 2, max: 5000 } )
+  req.checkBody( 'rating', 'Please provide a star rating ⭐' ).isInt( { min: 1, max: 5 } )
+}
+
 exports.displayErrors = ( req, res, view, options = {}, redirect = false ) => {
   const errors = req.validationErrors( true )
 
@@ -42,6 +47,18 @@ exports.displayErrors = ( req, res, view, options = {}, redirect = false ) => {
       const viewOptions = objDeepMerge( { body: req.body, flashes: req.flash() }, options )
       res.render( view, viewOptions ) // show errors to user
     }
+
+    return true // tell caller that errors were found
+  }
+  return false // tell caller that no errors were found
+}
+
+exports.displayErrorsAjax = ( req, res ) => {
+  const errors = req.validationErrors( true )
+
+  if ( errors ) {
+    res.status( 422 )
+    res.json( objValues( errors ).map( err => err.msg ) )
 
     return true // tell caller that errors were found
   }

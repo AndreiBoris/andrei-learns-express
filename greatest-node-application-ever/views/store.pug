@@ -1,5 +1,7 @@
 extends layout
 
+include mixins/_reviewForm
+
 block content
   .single
     .single__hero
@@ -18,6 +20,10 @@ block content
             li.tag
               a.tag__link(href=`/tags/${tag}`)
                 span.tag__text ##{tag}
+      +reviewForm( store._id, existingReview )
+      .reviews(data-store-id=store._id)
+
+        
 
 
     

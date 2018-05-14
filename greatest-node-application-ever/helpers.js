@@ -5,6 +5,8 @@
 // FS is a built in module to node that let's us read files from the system we're running on
 const fs = require( 'fs' )
 
+exports.isEmpty = require( 'lodash/isEmpty' )
+
 // moment.js is a handy library for displaying dates. We need this in our templates to display things like "Posted 5 minutes ago"
 exports.moment = require( 'moment' )
 

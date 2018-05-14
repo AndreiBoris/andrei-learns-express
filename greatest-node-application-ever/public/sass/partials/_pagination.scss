@@ -1,5 +1,6 @@
 .pagination {
   display: flex;
+  justify-content: center;
   align-items: center;
   background: white;
   margin-top: 2rem;
@@ -10,7 +11,7 @@
     padding: 1rem 3rem 1rem 1rem;
     a:after {
       margin-left: 1rem;
-      content: '→'
+      content: "→";
     }
   }
   &__prev {
@@ -18,7 +19,7 @@
     padding: 1rem 1rem 1rem 3rem;
     a:before {
       margin-right: 1rem;
-      content: '←'
+      content: "←";
     }
   }
   &__text {

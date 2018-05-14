@@ -7,6 +7,8 @@ const multer = require( 'multer' )
 const jimp = require( 'jimp' )
 const uuid = require( 'uuid' )
 
+const sanitization = require( '../sanitization.js' )
+
 const multerOptions = {
   storage: multer.memoryStorage(),
   fileFilter( req, file, next ) {
@@ -68,11 +70,67 @@ exports.createStore = async ( req, res ) => {
   res.redirect( `/stores/${store.slug}` )
 }
 
-exports.getStores = async ( req, res ) => {
-  // Query the database for all stores
-  const stores = await Store.find()
+const STORES_PER_PAGE = 6
 
-  res.render( 'stores', { title: 'Stores', stores } )
+const skippedStoresOnPage = ( page = 1, storesPerPage = 12 ) => Math.max( 0, ( page - 1 ) * storesPerPage )
+
+const getNextPage = currentPage => {
+  const nextPage = currentPage + 1
+  return nextPage
+}
+
+const getPreviousPage = currentPage => {
+  const nextPage = Math.max( 1, currentPage - 1 )
+  return nextPage
+}
+
+const createPageLink = ( currentRoute, page ) => {
+  if ( currentRoute.match( /:page$/ ) ) {
+    return currentRoute.replace( /:page$/, page )
+  }
+  const conditionalSlash = currentRoute.match( /\/$/ ) ? '' : '/'
+  let route = currentRoute
+  if ( currentRoute === '/' ) {
+    route = '/stores/'
+  }
+  return `${route}${conditionalSlash}page/${page}`
+}
+
+const paginationObject = ( req, page, pages, count ) => {
+  const pagination = {
+    page,
+    pages,
+    count,
+  }
+  if ( page !== 1 ) {
+    pagination.prev = createPageLink( req.route.path, page - 1 )
+  }
+  if ( page < pages ) {
+    pagination.next = createPageLink( req.route.path, page + 1 )
+  }
+  return pagination
+}
+
+exports.getStores = async ( req, res, next ) => {
+  const page = sanitization.sanitizePage( req.params.page )
+  const skip = skippedStoresOnPage( page, STORES_PER_PAGE )
+  const limit = STORES_PER_PAGE
+
+  // Query the database for all stores
+  const storesPromise = Store.find()
+    .skip( skip )
+    .limit( limit )
+    .select( '-location -tags -created' )
+  const countPromise = Store.count()
+  const [ stores, count ] = await Promise.all( [ storesPromise, countPromise ] )
+  const pages = Math.ceil( count / limit )
+  const pagination = paginationObject( req, page, pages, count )
+
+  if ( !stores.length ) {
+    next()
+  }
+
+  res.render( 'stores', { title: 'Stores', stores, pagination } )
 }
 
 const confirmOwner = ( store, user ) => {
@@ -114,14 +172,25 @@ exports.updateStore = async ( req, res ) => {
 exports.getStoreBySlug = async ( req, res, next ) => {
   // Get the store
   const store = await Store.findOne( { slug: req.params.slug } ).populate( 'author' )
+  // get all the reviews for this store. NOT strictly necessary as we populate reviews using ajax, but for demonstration purposes
+  // .populate( { path: 'reviews', populate: { path: 'author', select: 'name email' } } )
 
   if ( !store ) {
     next()
-    return
+  }
+
+  let existingReview = null
+  // add a flag to indicate that the logged-in user has already reviewed this store
+  if ( req.user ) {
+    existingReview = store.reviews.find( review => review.author._id.toString() === req.user._id.toString() )
   }
 
   // Render the template
-  res.render( 'store', { title: store.name, store } )
+  res.render( 'store', {
+    title: store.name,
+    store,
+    existingReview,
+  } )
 }
 
 exports.getStoresByTag = async ( req, res ) => {
@@ -131,7 +200,7 @@ exports.getStoresByTag = async ( req, res ) => {
   const tagQuery = tag || { $exists: true }
 
   const tagsPromise = Store.getTagsList()
-  const storesPromise = Store.find( { tags: tagQuery } )
+  const storesPromise = Store.find( { tags: tagQuery } ).select( '-location -tags -created' )
   const [ tags, stores ] = await Promise.all( [ tagsPromise, storesPromise ] )
 
   res.render( 'tag', {
@@ -218,11 +287,70 @@ exports.getHeartedStores = async ( req, res ) => {
     _id: {
       $in: req.user.hearts,
     },
-  } )
+  } ).select( '-location -tags -created' )
 
   // Alternate way of doing this:
   // const user = await User.findOne( { _id: req.user._id } ).populate( 'hearts' )
   // const { hearts: stores } = user
 
   res.render( 'stores', { title: 'Hearts', stores } )
+}
+
+exports.topStores = async ( req, res ) => {
+  const stores = await Store.getTopStores()
+
+  // res.json( top10 )
+  // return
+
+  // const reviews = await Review
+  //   // Group reviews by the stores that they belong to, counting the number of reviews and the average rating for each store
+  //   .aggregate( [
+  // {
+  //   $group: {
+  //     _id: '$store',
+  //     count: { $sum: 1 },
+  //     average: { $avg: '$rating' },
+  //   },
+  // },
+  //     // There must be at least two reviews for a store for it to show up
+  //     {
+  // $match: {
+  //   count: { $gt: 1 },
+  // },
+  //     },
+  //   ] )
+  //   // Sort the reviews with the highest ratings being at the top regaredless of number of reviews
+  // .sort( {
+  //   average: 'desc',
+  // } )
+  //   // This is a top 10 list
+  //   .limit( 10 )
+
+  // const storeIds = reviews.map( aggregate => aggregate._id )
+
+  // const stores = await Store.find( {
+  //   _id: {
+  //     $in: storeIds,
+  //   },
+  // } )
+  //   .lean()
+  //   .select( 'name slug photo' )
+
+  // // Not super efficient but OK when dealing with just a top 10
+  // const top10 = reviews.map( review => {
+  //   // Find the store correspond to this review from the query result
+  //   const correspondingStore = stores.find( store => review._id.toString() === store._id.toString() )
+
+  //   // Avoid exploding if the query did not find the store related to this review aggregation, though this shouldn't really ever occur
+  //   if ( !correspondingStore ) {
+  //     return review
+  //   }
+
+  //   correspondingStore.count = review.count
+  //   correspondingStore.average = review.average
+
+  //   return correspondingStore
+  // } )
+
+  res.render( 'top', { title: '⭐ Top Stores', stores } )
 }
