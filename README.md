@@ -1,6 +1,8 @@
 # Express Tutorial App
 
-This is a clone of Wes Bos's [Node Course repository](https://github.com/wesbos/Learn-Node) went through Wes Bos' Node course and build the Express/MongoDb restaurant application. After running `npm install` or `yarn install` should just be able to run this locally using `npm start` or `yarn start`
+This is a clone of Wes Bos's [Node Course repository](https://github.com/wesbos/Learn-Node). I went through Wes Bos' Node course and build the Express/MongoDb restaurant application. After running `npm install` or `yarn install` should just be able to run this locally using `npm start` or `yarn start`
+
+I am throwing it up on Github to maintain a central area for the things I am learning.
 
 Requires Node 8+ 
 
